@@ -1,0 +1,3 @@
+package = platform.posix
+headers = pthread.h
+linkerOpts = -lpthread
