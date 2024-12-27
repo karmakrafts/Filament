@@ -7,6 +7,7 @@ workflow:
     - if: $CI_PIPELINE_SOURCE == "schedule"
 
 stages:
+  - test
   - publish
   - release
 
@@ -15,6 +16,50 @@ cache:
     - .gradle/wrapper
     - .gradle/caches
     - .kotlin
+
+test:linux:
+  stage: test
+  before_script:
+    - export JAVA_HOME=/home/sdks/zulu-17
+  script:
+    - ./gradlew
+      clean
+      linuxX64Test
+      --no-daemon
+      --stacktrace
+  only:
+    - master
+  tags:
+    - linux
+
+test:macos:
+  stage: test
+  before_script:
+    - export JAVA_HOME=/Library/Java/JavaVirtualMachines/zulu-17.jdk/Contents/Home
+  script:
+    - ./gradlew
+      clean
+      macosArm64Test
+      --no-daemon
+      --stacktrace
+  only:
+    - master
+  tags:
+    - macos
+
+test:windows:
+  stage: test
+  script:
+    - ./gradlew
+      clean
+      mingwX64Test
+      --no-daemon
+      --stacktrace
+  only:
+    - master
+  tags:
+    - windows
+
 
 publish:linux:
   stage: publish
