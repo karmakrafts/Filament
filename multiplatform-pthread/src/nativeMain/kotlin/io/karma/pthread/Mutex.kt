@@ -42,4 +42,13 @@ value class Mutex @OptIn(ExperimentalForeignApi::class) private constructor(
 
     @OptIn(ExperimentalForeignApi::class)
     fun unlock() = unlockMutex(handle)
+
+    inline fun <reified R> guarded(closure: () -> R): R {
+        try {
+            lock()
+            return closure()
+        } finally {
+            unlock()
+        }
+    }
 }
