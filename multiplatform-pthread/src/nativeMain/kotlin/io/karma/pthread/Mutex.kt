@@ -25,7 +25,7 @@ internal expect fun unlockMutex(handle: MutexHandle)
 
 value class Mutex @OptIn(ExperimentalForeignApi::class) private constructor(
     private val handle: MutexHandle
-) : AutoCloseable {
+) : Lockable, AutoCloseable {
     companion object {
         @OptIn(ExperimentalForeignApi::class)
         fun create(): Mutex = Mutex(createMutex())
@@ -35,20 +35,11 @@ value class Mutex @OptIn(ExperimentalForeignApi::class) private constructor(
     override fun close() = destroyMutex(handle)
 
     @OptIn(ExperimentalForeignApi::class)
-    fun lock() = lockMutex(handle)
+    override fun lock() = lockMutex(handle)
 
     @OptIn(ExperimentalForeignApi::class)
-    fun tryLock(): Boolean = tryLockMutex(handle)
+    override fun tryLock(): Boolean = tryLockMutex(handle)
 
     @OptIn(ExperimentalForeignApi::class)
-    fun unlock() = unlockMutex(handle)
-
-    inline fun <reified R> guarded(closure: () -> R): R {
-        try {
-            lock()
-            return closure()
-        } finally {
-            unlock()
-        }
-    }
+    override fun unlock() = unlockMutex(handle)
 }

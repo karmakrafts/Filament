@@ -11,6 +11,7 @@ internal actual fun createMutex(): MutexHandle = MutexHandle(nativeHeap.alloc<pt
 @ExperimentalForeignApi
 internal actual fun destroyMutex(handle: MutexHandle) {
     pthread_mutex_destroy(handle.value.ptr)
+    nativeHeap.free(handle.value)
 }
 
 @ExperimentalForeignApi
