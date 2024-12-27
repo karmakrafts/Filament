@@ -1,7 +1,19 @@
 package io.karma.pthread
 
-import kotlinx.cinterop.*
-import platform.posix.*
+import kotlinx.cinterop.COpaquePointer
+import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.StableRef
+import kotlinx.cinterop.alloc
+import kotlinx.cinterop.asStableRef
+import kotlinx.cinterop.memScoped
+import kotlinx.cinterop.ptr
+import kotlinx.cinterop.staticCFunction
+import kotlinx.cinterop.value
+import platform.posix.pthread_create
+import platform.posix.pthread_detach
+import platform.posix.pthread_join
+import platform.posix.pthread_self
+import platform.posix.pthread_tVar
 
 @ExperimentalForeignApi
 private fun threadEntryPoint(userData: COpaquePointer?): COpaquePointer? {

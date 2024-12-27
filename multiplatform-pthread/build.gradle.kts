@@ -48,21 +48,6 @@ kotlin {
     }
     applyDefaultHierarchyTemplate()
     sourceSets {
-        val posixMain by creating {
-            dependsOn(nativeMain.get())
-        }
-        linuxMain {
-            dependsOn(posixMain)
-        }
-        androidNativeMain {
-            dependsOn(posixMain)
-        }
-        macosMain {
-            dependsOn(posixMain)
-        }
-        iosMain {
-            dependsOn(posixMain)
-        }
         commonMain {
             dependencies {
                 implementation(libs.kotlinx.io.bytestring)
