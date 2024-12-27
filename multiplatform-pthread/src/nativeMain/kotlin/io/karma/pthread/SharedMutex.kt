@@ -37,6 +37,17 @@ internal expect fun unlockWriteSharedMutex(handle: SharedMutexHandle)
 @ExperimentalForeignApi
 internal expect fun destroySharedMutex(handle: SharedMutexHandle)
 
+@PublishedApi
+internal value class WriteLockable(
+    private val mutex: SharedMutex
+) : Lockable {
+    override fun lock() = mutex.lockWrite()
+
+    override fun tryLock(): Boolean = mutex.tryLockWrite()
+
+    override fun unlock() = mutex.unlockWrite()
+}
+
 value class SharedMutex @OptIn(ExperimentalForeignApi::class) private constructor(
     private val handle: SharedMutexHandle
 ) : Lockable, AutoCloseable {
@@ -44,6 +55,9 @@ value class SharedMutex @OptIn(ExperimentalForeignApi::class) private constructo
         @OptIn(ExperimentalForeignApi::class)
         fun create(): SharedMutex = SharedMutex(createSharedMutex())
     }
+
+    inline val writeLockable: Lockable
+        get() = WriteLockable(this)
 
     @OptIn(ExperimentalForeignApi::class)
     override fun close() = destroySharedMutex(handle)
@@ -77,8 +91,8 @@ value class SharedMutex @OptIn(ExperimentalForeignApi::class) private constructo
     }
 
     inline fun <reified R> tryGuardedWrite(defaultValue: R, closure: () -> R): R {
+        if (!tryLockWrite()) return defaultValue
         try {
-            if (!tryLockWrite()) return defaultValue
             return closure()
         }
         finally {
