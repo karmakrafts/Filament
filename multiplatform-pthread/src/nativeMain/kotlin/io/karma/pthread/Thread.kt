@@ -2,6 +2,7 @@ package io.karma.pthread
 
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.posix.pthread_t
+import platform.posix.sched_yield
 
 @ExperimentalForeignApi
 internal data class ThreadHandle(
@@ -29,6 +30,8 @@ value class Thread @OptIn(ExperimentalForeignApi::class) private constructor(
 
         @OptIn(ExperimentalForeignApi::class)
         fun current(): Thread = Thread(currentThread())
+
+        fun yield() = sched_yield()
     }
 
     @OptIn(ExperimentalForeignApi::class)
