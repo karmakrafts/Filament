@@ -3,6 +3,11 @@ package io.karma.pthread
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.posix.pthread_t
 import platform.posix.sched_yield
+import kotlin.native.concurrent.ThreadLocal
+
+@PublishedApi
+@ThreadLocal
+internal var threadName: String? = null
 
 @ExperimentalForeignApi
 internal data class ThreadHandle(
@@ -21,9 +26,11 @@ internal expect fun joinThread(handle: ThreadHandle)
 @ExperimentalForeignApi
 internal expect fun detachThread(handle: ThreadHandle)
 
+@PublishedApi
 @ExperimentalForeignApi
 internal expect fun setThreadName(name: String?)
 
+@PublishedApi
 @ExperimentalForeignApi
 internal expect fun getThreadName(): String?
 
@@ -32,11 +39,11 @@ value class Thread @OptIn(ExperimentalForeignApi::class) private constructor(
 ) {
     companion object {
         @OptIn(ExperimentalForeignApi::class)
-        var name: String? = null
-            get() = getThreadName() ?: field
+        inline var name: String?
+            get() = getThreadName() ?: threadName
             set(value) {
                 setThreadName(value)
-                field = value
+                threadName = value
             }
 
         @OptIn(ExperimentalForeignApi::class)
