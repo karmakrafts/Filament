@@ -21,10 +21,24 @@ internal expect fun joinThread(handle: ThreadHandle)
 @ExperimentalForeignApi
 internal expect fun detachThread(handle: ThreadHandle)
 
+@ExperimentalForeignApi
+internal expect fun setThreadName(name: String?)
+
+@ExperimentalForeignApi
+internal expect fun getThreadName(): String?
+
 value class Thread @OptIn(ExperimentalForeignApi::class) private constructor(
     private val handle: ThreadHandle
 ) {
     companion object {
+        @OptIn(ExperimentalForeignApi::class)
+        var name: String? = null
+            get() = getThreadName() ?: field
+            set(value) {
+                setThreadName(value)
+                field = value
+            }
+
         @OptIn(ExperimentalForeignApi::class)
         fun create(function: () -> Unit): Thread = Thread(createThread(function))
 

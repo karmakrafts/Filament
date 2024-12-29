@@ -1,6 +1,5 @@
 package io.karma.pthread
 
-import kotlinx.cinterop.COpaquePointer
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.StableRef
 import kotlinx.cinterop.UnsafeNumber
@@ -14,16 +13,8 @@ import platform.posix.pthread_create
 import platform.posix.pthread_detach
 import platform.posix.pthread_join
 import platform.posix.pthread_self
+import platform.posix.pthread_setname_np
 import platform.posix.pthread_tVar
-
-@ExperimentalForeignApi
-private fun threadEntryPoint(userData: COpaquePointer?): COpaquePointer? {
-    userData?.asStableRef<() -> Unit>()?.apply {
-        get().invoke()
-        dispose()
-    }
-    return null
-}
 
 @OptIn(UnsafeNumber::class)
 @ExperimentalForeignApi
@@ -35,7 +26,13 @@ internal actual fun currentThread(): ThreadHandle {
 @ExperimentalForeignApi
 internal actual fun createThread(function: () -> Unit): ThreadHandle = memScoped {
     val handle = alloc<pthread_tVar>()
-    pthread_create(handle.ptr, null, staticCFunction(::threadEntryPoint), StableRef.create(function).asCPointer())
+    pthread_create(handle.ptr, null, staticCFunction { userData ->
+        userData?.asStableRef<() -> Unit>()?.apply {
+            get().invoke()
+            dispose()
+        }
+        null
+    }, StableRef.create(function).asCPointer())
     ThreadHandle(requireNotNull(handle.value) { "Could not create thread" })
 }
 
@@ -49,4 +46,15 @@ internal actual fun joinThread(handle: ThreadHandle) {
 @ExperimentalForeignApi
 internal actual fun detachThread(handle: ThreadHandle) {
     pthread_detach(handle.value)
+}
+
+@OptIn(UnsafeNumber::class)
+@ExperimentalForeignApi
+internal actual fun setThreadName(name: String?) {
+    pthread_setname_np(pthread_self(), name)
+}
+
+@ExperimentalForeignApi
+internal actual fun getThreadName(): String? {
+    return null // pthread_getname_np is not available here
 }

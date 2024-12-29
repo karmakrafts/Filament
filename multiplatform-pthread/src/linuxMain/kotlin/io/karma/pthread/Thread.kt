@@ -45,3 +45,13 @@ internal actual fun joinThread(handle: ThreadHandle) {
 internal actual fun detachThread(handle: ThreadHandle) {
     pthread_detach(handle.value)
 }
+
+@ExperimentalForeignApi
+internal actual fun setThreadName(name: String?) {
+    // pthread_setname_np is not available here
+}
+
+@ExperimentalForeignApi
+internal actual fun getThreadName(): String? {
+    return null // pthread_getname_np is not available here
+}
