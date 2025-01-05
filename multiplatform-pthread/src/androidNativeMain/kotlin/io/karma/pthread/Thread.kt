@@ -22,12 +22,14 @@ import kotlin.native.concurrent.ThreadLocal
 @ThreadLocal
 internal var threadName: String? = null
 
+@PublishedApi
 @OptIn(UnsafeNumber::class)
 @ExperimentalForeignApi
 internal actual fun currentThread(): ThreadHandle {
     return ThreadHandle(pthread_self())
 }
 
+@PublishedApi
 @OptIn(UnsafeNumber::class)
 @ExperimentalForeignApi
 internal actual fun createThread(function: () -> Unit): ThreadHandle = memScoped {
@@ -42,18 +44,21 @@ internal actual fun createThread(function: () -> Unit): ThreadHandle = memScoped
     ThreadHandle(requireNotNull(handle.value) { "Could not create thread" })
 }
 
+@PublishedApi
 @OptIn(UnsafeNumber::class)
 @ExperimentalForeignApi
 internal actual fun joinThread(handle: ThreadHandle) {
     pthread_join(handle.value, null)
 }
 
+@PublishedApi
 @OptIn(UnsafeNumber::class)
 @ExperimentalForeignApi
 internal actual fun detachThread(handle: ThreadHandle) {
     pthread_detach(handle.value)
 }
 
+@PublishedApi
 @OptIn(UnsafeNumber::class)
 @ExperimentalForeignApi
 internal actual fun setThreadName(name: String?) {
@@ -61,11 +66,13 @@ internal actual fun setThreadName(name: String?) {
     threadName = name
 }
 
+@PublishedApi
 @ExperimentalForeignApi
 internal actual fun getThreadName(): String {
     return threadName ?: "Thread ${getThreadId()}"
 }
 
+@PublishedApi
 @OptIn(UnsafeNumber::class)
 @ExperimentalForeignApi
 internal actual fun getThreadId(): ULong {

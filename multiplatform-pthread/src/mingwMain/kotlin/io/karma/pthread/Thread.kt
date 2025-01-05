@@ -31,11 +31,13 @@ private fun threadEntryPoint(userData: COpaquePointer?): COpaquePointer? {
     return null
 }
 
+@PublishedApi
 @ExperimentalForeignApi
 internal actual fun currentThread(): ThreadHandle {
     return ThreadHandle(pthread_self())
 }
 
+@PublishedApi
 @ExperimentalForeignApi
 internal actual fun createThread(function: () -> Unit): ThreadHandle = memScoped {
     val handle = alloc<pthread_tVar>()
@@ -43,21 +45,25 @@ internal actual fun createThread(function: () -> Unit): ThreadHandle = memScoped
     ThreadHandle(requireNotNull(handle.value) { "Could not create thread" })
 }
 
+@PublishedApi
 @ExperimentalForeignApi
 internal actual fun joinThread(handle: ThreadHandle) {
     pthread_join(handle.value, null)
 }
 
+@PublishedApi
 @ExperimentalForeignApi
 internal actual fun detachThread(handle: ThreadHandle) {
     pthread_detach(handle.value)
 }
 
+@PublishedApi
 @ExperimentalForeignApi
 internal actual fun setThreadName(name: String?) {
     pthread_setname_np(pthread_self(), name)
 }
 
+@PublishedApi
 @ExperimentalForeignApi
 internal actual fun getThreadName(): String = memScoped {
     val nameBuffer = allocArray<ByteVar>(4096).reinterpret<ByteVar>().pointed
@@ -65,6 +71,7 @@ internal actual fun getThreadName(): String = memScoped {
     nameBuffer.ptr.toKString().ifBlank { "Thread ${pthread_self()}" }
 }
 
+@PublishedApi
 @ExperimentalForeignApi
 internal actual fun getThreadId(): ULong {
     return pthread_self()
