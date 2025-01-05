@@ -25,7 +25,7 @@ import platform.posix.pthread_tVar
 @ExperimentalForeignApi
 private fun threadEntryPoint(userData: COpaquePointer?): COpaquePointer? {
     userData?.asStableRef<() -> Unit>()?.apply {
-        get().invoke()
+        get()()
         dispose()
     }
     return null
@@ -59,8 +59,13 @@ internal actual fun setThreadName(name: String?) {
 }
 
 @ExperimentalForeignApi
-internal actual fun getThreadName(): String? = memScoped {
+internal actual fun getThreadName(): String = memScoped {
     val nameBuffer = allocArray<ByteVar>(4096).reinterpret<ByteVar>().pointed
     pthread_getname_np(pthread_self(), nameBuffer.ptr, 4096U)
-    return nameBuffer.ptr.toKString()
+    nameBuffer.ptr.toKString().ifBlank { "Thread ${pthread_self()}" }
+}
+
+@ExperimentalForeignApi
+internal actual fun getThreadId(): ULong {
+    return pthread_self()
 }

@@ -3,6 +3,7 @@ package io.karma.pthread
 import kotlinx.cinterop.ByteVar
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.StableRef
+import kotlinx.cinterop.ULongVar
 import kotlinx.cinterop.alloc
 import kotlinx.cinterop.allocArray
 import kotlinx.cinterop.asStableRef
@@ -20,6 +21,7 @@ import platform.posix.pthread_join
 import platform.posix.pthread_self
 import platform.posix.pthread_setname_np
 import platform.posix.pthread_tVar
+import platform.posix.pthread_threadid_np
 
 @ExperimentalForeignApi
 internal actual fun currentThread(): ThreadHandle {
@@ -55,8 +57,15 @@ internal actual fun setThreadName(name: String?) {
 }
 
 @ExperimentalForeignApi
-internal actual fun getThreadName(): String? = memScoped {
+internal actual fun getThreadName(): String = memScoped {
     val nameBuffer = allocArray<ByteVar>(4096).reinterpret<ByteVar>().pointed
     pthread_getname_np(pthread_self(), nameBuffer.ptr, 4096U)
-    return nameBuffer.ptr.toKString()
+    return nameBuffer.ptr.toKString().ifBlank { "Thread ${pthread_self()?.pointed?.__sig}" }
+}
+
+@ExperimentalForeignApi
+internal actual fun getThreadId(): ULong = memScoped {
+    val id = alloc<ULongVar>()
+    pthread_threadid_np(pthread_self(), id.ptr)
+    id.value
 }

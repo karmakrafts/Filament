@@ -11,10 +11,16 @@ import kotlinx.cinterop.staticCFunction
 import kotlinx.cinterop.value
 import platform.posix.pthread_create
 import platform.posix.pthread_detach
+import platform.posix.pthread_gettid_np
 import platform.posix.pthread_join
 import platform.posix.pthread_self
 import platform.posix.pthread_setname_np
 import platform.posix.pthread_tVar
+import kotlin.native.concurrent.ThreadLocal
+
+@PublishedApi
+@ThreadLocal
+internal var threadName: String? = null
 
 @OptIn(UnsafeNumber::class)
 @ExperimentalForeignApi
@@ -52,9 +58,17 @@ internal actual fun detachThread(handle: ThreadHandle) {
 @ExperimentalForeignApi
 internal actual fun setThreadName(name: String?) {
     pthread_setname_np(pthread_self(), name)
+    threadName = name
 }
 
+@OptIn(UnsafeNumber::class)
 @ExperimentalForeignApi
-internal actual fun getThreadName(): String? {
-    return null // pthread_getname_np is not available here
+internal actual fun getThreadName(): String {
+    return threadName ?: "Thread ${pthread_self()}"
+}
+
+@OptIn(UnsafeNumber::class)
+@ExperimentalForeignApi
+internal actual fun getThreadId(): ULong {
+    return pthread_gettid_np(pthread_self()).toULong()
 }

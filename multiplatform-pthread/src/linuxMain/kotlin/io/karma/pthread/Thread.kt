@@ -5,15 +5,23 @@ import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.StableRef
 import kotlinx.cinterop.alloc
 import kotlinx.cinterop.asStableRef
+import kotlinx.cinterop.convert
 import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.ptr
 import kotlinx.cinterop.staticCFunction
 import kotlinx.cinterop.value
+import platform.linux.SYS_gettid
 import platform.posix.pthread_create
 import platform.posix.pthread_detach
 import platform.posix.pthread_join
 import platform.posix.pthread_self
 import platform.posix.pthread_tVar
+import platform.posix.syscall
+import kotlin.native.concurrent.ThreadLocal
+
+@PublishedApi
+@ThreadLocal
+internal var threadName: String? = null
 
 @ExperimentalForeignApi
 private fun threadEntryPoint(userData: COpaquePointer?): COpaquePointer? {
@@ -48,10 +56,15 @@ internal actual fun detachThread(handle: ThreadHandle) {
 
 @ExperimentalForeignApi
 internal actual fun setThreadName(name: String?) {
-    // pthread_setname_np is not available here
+    threadName = name
 }
 
 @ExperimentalForeignApi
-internal actual fun getThreadName(): String? {
-    return null // pthread_getname_np is not available here
+internal actual fun getThreadName(): String {
+    return threadName ?: "Thread ${getThreadId()}"
+}
+
+@ExperimentalForeignApi
+internal actual fun getThreadId(): ULong {
+    return syscall(SYS_gettid.convert()).toULong()
 }

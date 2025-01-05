@@ -3,26 +3,25 @@ package io.karma.pthread
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.posix.pthread_t
 import platform.posix.sched_yield
-import kotlin.native.concurrent.ThreadLocal
-
-@PublishedApi
-@ThreadLocal
-internal var threadName: String? = null
 
 @ExperimentalForeignApi
 internal data class ThreadHandle(
     val value: pthread_t
 )
 
+@PublishedApi
 @ExperimentalForeignApi
 internal expect fun currentThread(): ThreadHandle
 
+@PublishedApi
 @ExperimentalForeignApi
 internal expect fun createThread(function: () -> Unit): ThreadHandle
 
+@PublishedApi
 @ExperimentalForeignApi
 internal expect fun joinThread(handle: ThreadHandle)
 
+@PublishedApi
 @ExperimentalForeignApi
 internal expect fun detachThread(handle: ThreadHandle)
 
@@ -32,32 +31,40 @@ internal expect fun setThreadName(name: String?)
 
 @PublishedApi
 @ExperimentalForeignApi
-internal expect fun getThreadName(): String?
+internal expect fun getThreadName(): String
 
-value class Thread @OptIn(ExperimentalForeignApi::class) private constructor(
-    private val handle: ThreadHandle
+@PublishedApi
+@ExperimentalForeignApi
+internal expect fun getThreadId(): ULong
+
+@Suppress("NOTHING_TO_INLINE")
+value class Thread @OptIn(ExperimentalForeignApi::class) @PublishedApi internal constructor(
+    @PublishedApi internal val handle: ThreadHandle
 ) {
     companion object {
         @OptIn(ExperimentalForeignApi::class)
-        inline var name: String?
-            get() = getThreadName() ?: threadName
+        inline var name: String
+            get() = getThreadName()
             set(value) {
                 setThreadName(value)
-                threadName = value
             }
 
         @OptIn(ExperimentalForeignApi::class)
-        fun create(function: () -> Unit): Thread = Thread(createThread(function))
+        inline val id: ULong
+            get() = getThreadId()
 
         @OptIn(ExperimentalForeignApi::class)
-        fun current(): Thread = Thread(currentThread())
+        inline fun create(noinline function: () -> Unit): Thread = Thread(createThread(function))
 
-        fun yield() = sched_yield()
+        @OptIn(ExperimentalForeignApi::class)
+        inline fun current(): Thread = Thread(currentThread())
+
+        inline fun yield() = sched_yield()
     }
 
     @OptIn(ExperimentalForeignApi::class)
-    fun join() = joinThread(handle)
+    inline fun join() = joinThread(handle)
 
     @OptIn(ExperimentalForeignApi::class)
-    fun detach() = detachThread(handle)
+    inline fun detach() = detachThread(handle)
 }
