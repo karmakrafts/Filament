@@ -61,10 +61,9 @@ internal actual fun setThreadName(name: String?) {
     threadName = name
 }
 
-@OptIn(UnsafeNumber::class)
 @ExperimentalForeignApi
 internal actual fun getThreadName(): String {
-    return threadName ?: "Thread ${pthread_self()}"
+    return threadName ?: "Thread ${getThreadId()}"
 }
 
 @OptIn(UnsafeNumber::class)

@@ -60,7 +60,7 @@ internal actual fun setThreadName(name: String?) {
 internal actual fun getThreadName(): String = memScoped {
     val nameBuffer = allocArray<ByteVar>(4096).reinterpret<ByteVar>().pointed
     pthread_getname_np(pthread_self(), nameBuffer.ptr, 4096U)
-    return nameBuffer.ptr.toKString().ifBlank { "Thread ${pthread_self()?.pointed?.__sig}" }
+    return nameBuffer.ptr.toKString().ifBlank { "Thread ${getThreadId()}" }
 }
 
 @ExperimentalForeignApi
