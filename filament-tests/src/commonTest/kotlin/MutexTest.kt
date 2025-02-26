@@ -5,8 +5,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class MutexTest {
-    private val mutex: Mutex = Mutex()
-    private var theValue: Int = 0
+    val mutex: Mutex = Mutex()
+    var theValue: Int = 0
 
     @Test
     fun `Set value from another thread`() {

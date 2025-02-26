@@ -27,7 +27,9 @@ internal actual fun currentThread(): ThreadHandle {
 }
 
 internal actual fun createThread(function: () -> Unit): ThreadHandle {
-    return JvmThreadHandle(JavaThread(function))
+    return JvmThreadHandle(JavaThread(function).apply {
+        start()
+    })
 }
 
 internal actual fun joinThread(handle: ThreadHandle) {
