@@ -14,22 +14,15 @@
  * limitations under the License.
  */
 
-rootProject.name = "filament"
-
-pluginManagement {
-    repositories {
-        google()
-        mavenCentral()
-        gradlePluginPortal()
-    }
+plugins {
+    `kotlin-dsl`
 }
 
-dependencyResolutionManagement {
-    repositories {
-        google()
-        mavenCentral()
-    }
+repositories {
+    mavenCentral()
+    google()
 }
 
-include("filament")
-include("filament-tests")
+dependencies {
+    implementation("com.google.code.gson:gson:2.11.0")
+}

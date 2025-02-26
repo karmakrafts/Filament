@@ -14,22 +14,36 @@
  * limitations under the License.
  */
 
-rootProject.name = "filament"
+@file:JvmName("Lockable$")
 
-pluginManagement {
-    repositories {
-        google()
-        mavenCentral()
-        gradlePluginPortal()
+package io.karma.filament
+
+import kotlin.jvm.JvmName
+
+interface Lockable {
+    fun lock()
+
+    fun tryLock(): Boolean
+
+    fun unlock()
+}
+
+inline fun <reified R> Lockable.guarded(closure: () -> R): R {
+    try {
+        lock()
+        return closure()
+    }
+    finally {
+        unlock()
     }
 }
 
-dependencyResolutionManagement {
-    repositories {
-        google()
-        mavenCentral()
+inline fun <reified R> Lockable.tryGuarded(defaultValue: R, closure: () -> R): R {
+    if (!tryLock()) return defaultValue
+    try {
+        return closure()
+    }
+    finally {
+        unlock()
     }
 }
-
-include("filament")
-include("filament-tests")

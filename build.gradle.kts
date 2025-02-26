@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Karma Krafts & associates
+ * Copyright 2025 Karma Krafts & associates
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ val buildConfig: Properties = Properties().apply {
         load(it)
     }
 }
-val baseVersion: String = libs.versions.multiplatformPthread.get()
+val baseVersion: String = libs.versions.filament.get()
 
 val generateVersionInfo by tasks.registering {
     doLast {

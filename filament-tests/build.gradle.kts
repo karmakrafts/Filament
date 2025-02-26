@@ -14,22 +14,32 @@
  * limitations under the License.
  */
 
-rootProject.name = "filament"
-
-pluginManagement {
-    repositories {
-        google()
-        mavenCentral()
-        gradlePluginPortal()
-    }
+plugins {
+    alias(libs.plugins.kotlin.multiplatform)
 }
 
-dependencyResolutionManagement {
-    repositories {
-        google()
-        mavenCentral()
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(11)
     }
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
 }
 
-include("filament")
-include("filament-tests")
+kotlin {
+    mingwX64()
+    linuxX64()
+    linuxArm64()
+    macosX64()
+    macosArm64()
+    jvm()
+    applyDefaultHierarchyTemplate()
+    sourceSets {
+        commonTest {
+            dependencies {
+                implementation(kotlin("test"))
+                implementation(project(":filament"))
+            }
+        }
+    }
+}

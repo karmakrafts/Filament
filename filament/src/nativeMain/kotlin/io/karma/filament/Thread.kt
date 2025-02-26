@@ -14,22 +14,17 @@
  * limitations under the License.
  */
 
-rootProject.name = "filament"
+package io.karma.filament
 
-pluginManagement {
-    repositories {
-        google()
-        mavenCentral()
-        gradlePluginPortal()
-    }
+import kotlinx.cinterop.ExperimentalForeignApi
+import platform.posix.pthread_t
+import platform.posix.sched_yield
+
+internal data class NativeThreadHandle(
+    val value: pthread_t
+) : ThreadHandle
+
+@OptIn(ExperimentalForeignApi::class)
+internal actual fun yieldThread() {
+    sched_yield()
 }
-
-dependencyResolutionManagement {
-    repositories {
-        google()
-        mavenCentral()
-    }
-}
-
-include("filament")
-include("filament-tests")
