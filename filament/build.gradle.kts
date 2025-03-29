@@ -14,27 +14,36 @@
  * limitations under the License.
  */
 
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.konan.target.Family
+import java.time.ZonedDateTime
 
 plugins {
+    alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.dokka)
+    signing
     `maven-publish`
 }
 
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(11)
-    }
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
-}
-
 kotlin {
-    listOf(
-        mingwX64(), linuxX64(), linuxArm64(), macosX64(), macosArm64(), androidNativeArm32(), androidNativeArm64(),
-        androidNativeX64(), iosX64(), iosArm64(), iosSimulatorArm64()
-    ).forEach { target ->
+    withSourcesJar(true)
+    mingwX64()
+    linuxX64()
+    linuxArm64()
+    macosX64()
+    macosArm64()
+    iosX64()
+    iosArm64()
+    iosSimulatorArm64()
+    androidTarget {
+        publishLibraryVariants("release")
+    }
+    androidNativeArm32()
+    androidNativeArm64()
+    androidNativeX64()
+    jvm()
+    targets.filterIsInstance<KotlinNativeTarget>().forEach { target ->
         target.apply {
             compilations.getByName("main") {
                 cinterops {
@@ -45,28 +54,44 @@ kotlin {
             }
         }
     }
-    jvm()
     applyDefaultHierarchyTemplate()
     sourceSets {
-        commonMain {
+        val commonMain by getting {
             dependencies {
                 implementation(libs.kotlinx.io.bytestring)
                 implementation(libs.kotlinx.io.core)
             }
         }
+        nativeMain {
+            dependencies {
+                implementation(libs.stately.common)
+                implementation(libs.stately.collections)
+            }
+        }
+        val jvmAndAndroidMain by creating { dependsOn(commonMain) }
+        jvmMain { dependsOn(jvmAndAndroidMain) }
+        androidMain { dependsOn(jvmAndAndroidMain) }
+        commonTest {
+            dependencies {
+                implementation(kotlin("test"))
+            }
+        }
+    }
+}
+
+android {
+    namespace = "$group.${rootProject.name}"
+    compileSdk = libs.versions.androidCompileSDK.get().toInt()
+    defaultConfig {
+        minSdk = libs.versions.androidMinimalSDK.get().toInt()
     }
 }
 
 dokka {
     moduleName = project.name
-    dokkaSourceSets {
-        val nativeMain by getting {
-            sourceRoots.from(kotlin.sourceSets.getByName("nativeMain").kotlin.srcDirs)
-        }
-    }
     pluginsConfiguration {
         html {
-            footerMessage = "(c) 2025 Karma Krafts & associates"
+            footerMessage = "(c) ${ZonedDateTime.now().year} Karma Krafts & associates"
         }
     }
 }
@@ -84,50 +109,6 @@ tasks {
             mustRunAfter(dokkaJar)
             from(zipTree(dokkaJar.get().outputs.files.first()))
             into(docsDir)
-        }
-    }
-}
-
-publishing {
-    System.getenv("CI_API_V4_URL")?.let { apiUrl ->
-        repositories {
-            maven {
-                url = uri("$apiUrl/projects/${System.getenv("CI_PROJECT_ID")}/packages/maven")
-                name = "GitLab"
-                credentials(HttpHeaderCredentials::class) {
-                    name = "Job-Token"
-                    value = System.getenv("CI_JOB_TOKEN")
-                }
-                authentication {
-                    create("header", HttpHeaderAuthentication::class)
-                }
-            }
-        }
-    }
-    publications.configureEach {
-        if (this is MavenPublication) {
-            artifact(dokkaJar)
-            pom {
-                name = project.name
-                description = "Common Thread class (and snychronization primitives) for Kotlin/Multiplatform."
-                url = System.getenv("CI_PROJECT_URL")
-                licenses {
-                    license {
-                        name = "Apache License 2.0"
-                        url = "https://www.apache.org/licenses/LICENSE-2.0"
-                    }
-                }
-                developers {
-                    developer {
-                        id = "kitsunealex"
-                        name = "KitsuneAlex"
-                        url = "https://git.karmakrafts.dev/KitsuneAlex"
-                    }
-                }
-                scm {
-                    url = this@pom.url
-                }
-            }
         }
     }
 }

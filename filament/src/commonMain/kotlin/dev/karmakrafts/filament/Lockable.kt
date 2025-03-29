@@ -14,26 +14,34 @@
  * limitations under the License.
  */
 
-rootProject.name = "filament"
+@file:JvmName("Lockable$")
 
-pluginManagement {
-    repositories {
-        google()
-        mavenCentral()
-        mavenLocal()
-        gradlePluginPortal()
-        maven("https://central.sonatype.com/repository/maven-snapshots")
+package dev.karmakrafts.filament
+
+import kotlin.jvm.JvmName
+
+interface Lockable {
+    fun lock()
+
+    fun tryLock(): Boolean
+
+    fun unlock()
+}
+
+inline fun <reified R> Lockable.guarded(closure: () -> R): R {
+    try {
+        lock()
+        return closure()
+    } finally {
+        unlock()
     }
 }
 
-dependencyResolutionManagement {
-    @Suppress("UnstableApiUsage")
-    repositories {
-        google()
-        mavenCentral()
-        mavenLocal()
-        maven("https://central.sonatype.com/repository/maven-snapshots")
+inline fun <reified R> Lockable.tryGuarded(defaultValue: R, closure: () -> R): R {
+    if (!tryLock()) return defaultValue
+    try {
+        return closure()
+    } finally {
+        unlock()
     }
 }
-
-include("filament")

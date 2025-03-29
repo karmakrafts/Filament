@@ -14,26 +14,17 @@
  * limitations under the License.
  */
 
-rootProject.name = "filament"
+package dev.karmakrafts.filament
 
-pluginManagement {
-    repositories {
-        google()
-        mavenCentral()
-        mavenLocal()
-        gradlePluginPortal()
-        maven("https://central.sonatype.com/repository/maven-snapshots")
-    }
+import kotlinx.cinterop.ExperimentalForeignApi
+import platform.posix.pthread_t
+import platform.posix.sched_yield
+
+internal data class NativeThreadHandle(
+    val value: pthread_t
+) : ThreadHandle
+
+@OptIn(ExperimentalForeignApi::class)
+internal actual fun yieldThread() {
+    sched_yield()
 }
-
-dependencyResolutionManagement {
-    @Suppress("UnstableApiUsage")
-    repositories {
-        google()
-        mavenCentral()
-        mavenLocal()
-        maven("https://central.sonatype.com/repository/maven-snapshots")
-    }
-}
-
-include("filament")
