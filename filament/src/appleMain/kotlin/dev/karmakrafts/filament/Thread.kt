@@ -19,7 +19,7 @@ package dev.karmakrafts.filament
 import kotlinx.cinterop.*
 import platform.posix.*
 
-@ExperimentalForeignApi
+@OptIn(ExperimentalForeignApi::class)
 private fun threadEntryPoint(userData: COpaquePointer?): COpaquePointer? {
     userData?.asStableRef<() -> Unit>()?.apply {
         get().invoke()
@@ -28,52 +28,50 @@ private fun threadEntryPoint(userData: COpaquePointer?): COpaquePointer? {
     return null
 }
 
-@ExperimentalForeignApi
+@OptIn(ExperimentalForeignApi::class)
 internal actual fun currentThread(): ThreadHandle {
     return NativeThreadHandle(requireNotNull(pthread_self()) { "Could not retrieve current thread" })
 }
 
-@ExperimentalForeignApi
+@OptIn(ExperimentalForeignApi::class)
 internal actual fun createThread(function: () -> Unit): ThreadHandle = memScoped {
     val handle = alloc<pthread_tVar>()
     pthread_create(handle.ptr, null, staticCFunction(::threadEntryPoint), StableRef.create(function).asCPointer())
     NativeThreadHandle(requireNotNull(handle.value) { "Could not create thread" })
 }
 
-@ExperimentalForeignApi
+@OptIn(ExperimentalForeignApi::class)
 internal actual fun joinThread(handle: ThreadHandle) {
     require(handle is NativeThreadHandle)
     pthread_join(handle.value, null)
 }
 
-@ExperimentalForeignApi
+@OptIn(ExperimentalForeignApi::class)
 internal actual fun detachThread(handle: ThreadHandle) {
     require(handle is NativeThreadHandle)
     pthread_detach(handle.value)
 }
 
-@ExperimentalForeignApi
+@OptIn(ExperimentalForeignApi::class)
 internal actual fun setThreadName(name: String?) {
     pthread_setname_np(name)
 }
 
-@OptIn(UnsafeNumber::class)
-@ExperimentalForeignApi
+@OptIn(UnsafeNumber::class, ExperimentalForeignApi::class)
 internal actual fun getThreadName(): String = memScoped {
     val nameBuffer = allocArray<ByteVar>(4096).reinterpret<ByteVar>().pointed
     pthread_getname_np(pthread_self(), nameBuffer.ptr, 4096U)
     return nameBuffer.ptr.toKString().ifBlank { "Thread ${getThreadId()}" }
 }
 
-@ExperimentalForeignApi
+@OptIn(ExperimentalForeignApi::class)
 internal actual fun getThreadId(): ULong = memScoped {
     val id = alloc<ULongVar>()
     pthread_threadid_np(pthread_self(), id.ptr)
     id.value
 }
 
-@OptIn(UnsafeNumber::class)
-@ExperimentalForeignApi
+@OptIn(UnsafeNumber::class, ExperimentalForeignApi::class)
 internal actual fun suspendThread(millis: Long): Long = memScoped {
     val spec = alloc<timespec> {
         tv_sec = (millis / 1000).convert()
