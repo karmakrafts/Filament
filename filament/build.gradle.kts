@@ -36,6 +36,13 @@ kotlin {
     iosX64()
     iosArm64()
     iosSimulatorArm64()
+    tvosArm64()
+    tvosX64()
+    tvosSimulatorArm64()
+    watchosArm32()
+    watchosArm64()
+    watchosX64()
+    watchosSimulatorArm64()
     androidTarget {
         publishLibraryVariants("release")
     }
@@ -47,7 +54,7 @@ kotlin {
         target.apply {
             compilations.getByName("main") {
                 cinterops {
-                    if (konanTarget.family == Family.OSX || konanTarget.family == Family.IOS) {
+                    if (konanTarget.family.isAppleFamily) {
                         val pthread by creating
                     }
                 }
