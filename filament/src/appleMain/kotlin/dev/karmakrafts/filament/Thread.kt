@@ -57,6 +57,7 @@ internal actual fun setThreadName(name: String?) {
     pthread_setname_np(name)
 }
 
+@OptIn(UnsafeNumber::class)
 @ExperimentalForeignApi
 internal actual fun getThreadName(): String = memScoped {
     val nameBuffer = allocArray<ByteVar>(4096).reinterpret<ByteVar>().pointed
@@ -71,12 +72,13 @@ internal actual fun getThreadId(): ULong = memScoped {
     id.value
 }
 
+@OptIn(UnsafeNumber::class)
 @ExperimentalForeignApi
 internal actual fun suspendThread(millis: Long): Long = memScoped {
     val spec = alloc<timespec> {
-        tv_sec = millis / 1000
-        tv_nsec = millis % 1000000
+        tv_sec = (millis / 1000).convert()
+        tv_nsec = (millis % 1000000).convert()
     }
     nanosleep(spec.ptr, spec.ptr)
-    (spec.tv_sec * 1000) + (spec.tv_nsec / 1000000)
+    (spec.tv_sec * 1000).toLong() + (spec.tv_nsec / 1000000)
 }
