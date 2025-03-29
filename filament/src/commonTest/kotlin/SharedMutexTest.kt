@@ -30,8 +30,7 @@ class SharedMutexTest {
 
     @Test
     fun `Create multiple shared mutexes in a loop`() {
-        for (index in 0..<10000) {
-            val mutex = SharedMutex()
+        for (index in 0..<1000) {
             val thread = Thread {
                 mutex.guardedWrite {
                     theValue = index

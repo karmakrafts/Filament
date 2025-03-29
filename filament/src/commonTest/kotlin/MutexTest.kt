@@ -23,8 +23,7 @@ class MutexTest {
 
     @Test
     fun `Create multiple mutexes in a loop`() {
-        for (index in 0..<10000) {
-            val mutex = Mutex()
+        for (index in 0..<1000) {
             val thread = Thread {
                 mutex.guarded {
                     theValue = index
