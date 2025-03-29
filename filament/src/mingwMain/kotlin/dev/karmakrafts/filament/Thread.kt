@@ -16,8 +16,29 @@
 
 package dev.karmakrafts.filament
 
-import kotlinx.cinterop.*
-import platform.posix.*
+import kotlinx.cinterop.ByteVar
+import kotlinx.cinterop.COpaquePointer
+import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.StableRef
+import kotlinx.cinterop.alloc
+import kotlinx.cinterop.allocArray
+import kotlinx.cinterop.asStableRef
+import kotlinx.cinterop.memScoped
+import kotlinx.cinterop.pointed
+import kotlinx.cinterop.ptr
+import kotlinx.cinterop.reinterpret
+import kotlinx.cinterop.staticCFunction
+import kotlinx.cinterop.toKString
+import kotlinx.cinterop.value
+import platform.posix.nanosleep
+import platform.posix.pthread_create
+import platform.posix.pthread_detach
+import platform.posix.pthread_getname_np
+import platform.posix.pthread_join
+import platform.posix.pthread_self
+import platform.posix.pthread_setname_np
+import platform.posix.pthread_tVar
+import platform.posix.timespec
 
 @ExperimentalForeignApi
 private fun threadEntryPoint(userData: COpaquePointer?): COpaquePointer? {

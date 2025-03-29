@@ -16,8 +16,18 @@
 
 package dev.karmakrafts.filament
 
-import kotlinx.cinterop.*
-import platform.posix.*
+import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.alloc
+import kotlinx.cinterop.memScoped
+import kotlinx.cinterop.ptr
+import kotlinx.cinterop.value
+import platform.posix.pthread_mutex_destroy
+import platform.posix.pthread_mutex_init
+import platform.posix.pthread_mutex_lock
+import platform.posix.pthread_mutex_t
+import platform.posix.pthread_mutex_tVar
+import platform.posix.pthread_mutex_trylock
+import platform.posix.pthread_mutex_unlock
 
 @ExperimentalForeignApi
 internal actual fun createMutex(): MutexHandle = memScoped {

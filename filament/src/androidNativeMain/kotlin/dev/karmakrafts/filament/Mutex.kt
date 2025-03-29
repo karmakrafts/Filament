@@ -16,8 +16,18 @@
 
 package dev.karmakrafts.filament
 
-import kotlinx.cinterop.*
-import platform.posix.*
+import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.UnsafeNumber
+import kotlinx.cinterop.alloc
+import kotlinx.cinterop.free
+import kotlinx.cinterop.nativeHeap
+import kotlinx.cinterop.ptr
+import platform.posix.pthread_mutex_destroy
+import platform.posix.pthread_mutex_init
+import platform.posix.pthread_mutex_lock
+import platform.posix.pthread_mutex_t
+import platform.posix.pthread_mutex_trylock
+import platform.posix.pthread_mutex_unlock
 
 @OptIn(UnsafeNumber::class, ExperimentalForeignApi::class)
 internal actual fun createMutex(): MutexHandle = NativeMutexHandle(nativeHeap.alloc<pthread_mutex_t> {

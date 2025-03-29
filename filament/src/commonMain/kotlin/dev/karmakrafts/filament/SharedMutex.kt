@@ -58,7 +58,8 @@ inline fun <reified R> SharedMutex.guardedWrite(closure: () -> R): R {
     try {
         lockWrite()
         return closure()
-    } finally {
+    }
+    finally {
         unlockWrite()
     }
 }
@@ -67,7 +68,8 @@ inline fun <reified R> SharedMutex.tryGuardedWrite(defaultValue: R, closure: () 
     if (!tryLockWrite()) return defaultValue
     try {
         return closure()
-    } finally {
+    }
+    finally {
         unlockWrite()
     }
 }

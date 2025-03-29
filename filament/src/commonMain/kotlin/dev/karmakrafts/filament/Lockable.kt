@@ -32,7 +32,8 @@ inline fun <reified R> Lockable.guarded(closure: () -> R): R {
     try {
         lock()
         return closure()
-    } finally {
+    }
+    finally {
         unlock()
     }
 }
@@ -41,7 +42,8 @@ inline fun <reified R> Lockable.tryGuarded(defaultValue: R, closure: () -> R): R
     if (!tryLock()) return defaultValue
     try {
         return closure()
-    } finally {
+    }
+    finally {
         unlock()
     }
 }

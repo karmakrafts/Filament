@@ -16,9 +16,25 @@
 
 package dev.karmakrafts.filament
 
-import kotlinx.cinterop.*
+import kotlinx.cinterop.COpaquePointer
+import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.StableRef
+import kotlinx.cinterop.alloc
+import kotlinx.cinterop.asStableRef
+import kotlinx.cinterop.convert
+import kotlinx.cinterop.memScoped
+import kotlinx.cinterop.ptr
+import kotlinx.cinterop.staticCFunction
+import kotlinx.cinterop.value
 import platform.linux.SYS_gettid
-import platform.posix.*
+import platform.posix.nanosleep
+import platform.posix.pthread_create
+import platform.posix.pthread_detach
+import platform.posix.pthread_join
+import platform.posix.pthread_self
+import platform.posix.pthread_tVar
+import platform.posix.syscall
+import platform.posix.timespec
 import kotlin.native.concurrent.ThreadLocal
 
 @ThreadLocal

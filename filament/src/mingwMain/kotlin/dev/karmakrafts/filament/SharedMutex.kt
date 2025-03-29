@@ -16,8 +16,20 @@
 
 package dev.karmakrafts.filament
 
-import kotlinx.cinterop.*
-import platform.posix.*
+import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.alloc
+import kotlinx.cinterop.memScoped
+import kotlinx.cinterop.ptr
+import kotlinx.cinterop.value
+import platform.posix.pthread_rwlock_destroy
+import platform.posix.pthread_rwlock_init
+import platform.posix.pthread_rwlock_rdlock
+import platform.posix.pthread_rwlock_t
+import platform.posix.pthread_rwlock_tVar
+import platform.posix.pthread_rwlock_tryrdlock
+import platform.posix.pthread_rwlock_trywrlock
+import platform.posix.pthread_rwlock_unlock
+import platform.posix.pthread_rwlock_wrlock
 
 @ExperimentalForeignApi
 internal actual fun createSharedMutex(): SharedMutexHandle = memScoped {
