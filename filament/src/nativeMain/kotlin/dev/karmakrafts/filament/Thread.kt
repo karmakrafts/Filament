@@ -20,6 +20,7 @@ import kotlinx.cinterop.ExperimentalForeignApi
 import platform.posix.pthread_t
 import platform.posix.sched_yield
 
+@OptIn(ExperimentalForeignApi::class)
 internal data class NativeThreadHandle(
     val value: pthread_t
 ) : ThreadHandle
