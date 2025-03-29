@@ -85,8 +85,6 @@ test:linux:
     - export JAVA_HOME=/home/sdks/zulu-17
   script:
     - ./gradlew clean linuxX64Test --stacktrace
-  only:
-    - master
   tags:
     - linux
 
@@ -98,8 +96,6 @@ test:macos:
     - export JAVA_HOME=/Library/Java/JavaVirtualMachines/zulu-17.jdk/Contents/Home
   script:
     - ./gradlew clean macosArm64Test --stacktrace
-  only:
-    - master
   tags:
     - macos
 
@@ -109,8 +105,6 @@ test:windows:
     - *if-merge-request-or-main
   script:
     - ./gradlew clean mingwX64Test --stacktrace
-  only:
-    - master
   tags:
     - windows
 
