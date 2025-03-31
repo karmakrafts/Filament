@@ -21,6 +21,8 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlin.concurrent.atomics.AtomicInt
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.concurrent.atomics.incrementAndFetch
@@ -28,7 +30,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 @OptIn(ExperimentalAtomicApi::class)
-class ThreadDispatcherTest {
+class ExecutorDispatcherTest {
     companion object {
         private const val THREAD_COUNT: Int = 4
         private const val JOB_COUNT: Int = 1000
@@ -37,8 +39,8 @@ class ThreadDispatcherTest {
     @Test
     fun `Single-threaded dispatch`() {
         val count = AtomicInt(0)
-        ThreadDispatcher().use { dispatcher ->
-            val scope = CoroutineScope(dispatcher)
+        ThreadPool().use { pool ->
+            val scope = CoroutineScope(pool.asDispatcher())
             assertEquals(0, count.load())
             runBlocking {
                 (0..<JOB_COUNT).map {
@@ -53,20 +55,27 @@ class ThreadDispatcherTest {
     @Test
     fun `Multi-threaded dispatch`() {
         val count = AtomicInt(0)
-        val threadIds = HashSet<ULong>()
-        ThreadDispatcher(parallelism = THREAD_COUNT).use { dispatcher ->
-            val scope = CoroutineScope(dispatcher)
+        val threadIds = HashMap<ULong, Int>()
+        val threadIdsMutex = Mutex()
+        ThreadPool(parallelism = THREAD_COUNT).use { pool ->
+            val scope = CoroutineScope(pool.asDispatcher())
             assertEquals(0, count.load())
             runBlocking {
                 (0..<JOB_COUNT).map {
                     scope.launch {
-                        threadIds += Thread.id
+                        val threadId = Thread.id
+                        threadIdsMutex.withLock {
+                            threadIds[threadId] = threadIds.getOrPut(threadId) { 0 } + 1
+                        }
                         count.incrementAndFetch()
                     }
                 }.joinAll()
             }
             assertEquals(JOB_COUNT, count.load())
             assertEquals(THREAD_COUNT, threadIds.size)
+
+            for ((id, count) in threadIds) println("Dispatched $count tasks to thread $id")
+
             scope.cancel()
         }
     }

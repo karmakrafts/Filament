@@ -16,11 +16,8 @@
 
 package dev.karmakrafts.filament
 
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Runnable
 import kotlin.concurrent.atomics.AtomicBoolean
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
-import kotlin.coroutines.CoroutineContext
 
 // TODO: document this
 typealias DispatcherThreadFactory = (block: () -> Unit, index: Int) -> Thread
@@ -30,35 +27,45 @@ val defaultDispatcherThreadFactory: DispatcherThreadFactory = { block, _ -> Thre
 
 // TODO: document this
 @OptIn(ExperimentalAtomicApi::class)
-open class ThreadDispatcher( // @formatter:off
+class ThreadPool( // @formatter:off
     threadFactory: DispatcherThreadFactory = defaultDispatcherThreadFactory,
     parallelism: Int = 1
-) : CoroutineDispatcher(), AutoCloseable { // @formatter:on
-    private val jobs: ArrayList<Runnable> = ArrayList()
-    private val jobsMutex: Mutex = Mutex()
-    private val isRunning: AtomicBoolean = AtomicBoolean(true)
+) : Executor, AutoCloseable { // @formatter:on
+    @PublishedApi
+    internal val _isRunning: AtomicBoolean = AtomicBoolean(true)
+
+    @PublishedApi
+    internal val tasks: ArrayDeque<() -> Unit> = ArrayDeque()
+
+    @PublishedApi
+    internal val tasksMutex: Mutex = Mutex()
+
+    inline val activeJobs: List<() -> Unit>
+        get() = tasksMutex.guarded { tasks.toCollection(ArrayList()) }
+
+    override val isRunning: Boolean
+        get() = _isRunning.load()
+
+    override fun enqueueTask(task: () -> Unit) {
+        tasksMutex.guarded {
+            tasks += task
+        }
+    }
 
     private val threads: Array<Thread> = Array(parallelism) { index ->
         threadFactory(::threadMain, index)
     }
 
     private fun threadMain() {
-        while (isRunning.load()) {
-            jobsMutex.guarded {
-                if (jobs.isEmpty()) return@guarded
-                jobs.removeFirst().run()
-            }
-        }
-    }
-
-    override fun dispatch(context: CoroutineContext, block: Runnable) {
-        jobsMutex.guarded {
-            jobs += block
+        while (_isRunning.load()) {
+            if (tasksMutex.guarded(tasks::size) == 0) Thread.yield()
+            if (tasksMutex.guarded(tasks::size) == 0) continue
+            tasksMutex.guarded(tasks::removeFirstOrNull)?.invoke()
         }
     }
 
     override fun close() {
-        if (!isRunning.compareAndSet(expectedValue = true, newValue = false)) return
+        if (!_isRunning.compareAndSet(expectedValue = true, newValue = false)) return
         for (thread in threads) thread.join()
     }
 }
