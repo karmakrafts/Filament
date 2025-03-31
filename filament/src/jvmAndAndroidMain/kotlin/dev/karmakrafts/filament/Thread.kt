@@ -16,6 +16,8 @@
 
 package dev.karmakrafts.filament
 
+import kotlin.time.Duration.Companion.nanoseconds
+import kotlin.time.DurationUnit
 import java.lang.Thread as JavaThread
 
 internal data class JvmThreadHandle(
@@ -59,8 +61,9 @@ internal actual fun getThreadId(): ULong {
 }
 
 internal actual fun suspendThread(millis: Long): Long {
+    val lastTime = System.nanoTime()
     JavaThread.sleep(millis)
-    return 0 // We always assume perfect suspend time for now
+    return (System.nanoTime() - lastTime).nanoseconds.toLong(DurationUnit.MILLISECONDS)
 }
 
 internal actual fun yieldThread() {

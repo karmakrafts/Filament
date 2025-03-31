@@ -8,6 +8,7 @@ androidMinimalSDK = "28"
 filament = "1.2.0"
 kotlin = "2.1.20" # https://github.com/JetBrains/kotlin/releases
 kotlinxIo = "0.7.0" # https://github.com/Kotlin/kotlinx-io/releases
+kotlinxCoroutines = "1.10.1"
 dokka = "2.0.0" # https://github.com/Kotlin/dokka/releases
 karmaConventions = "1.3.0.13-SNAPSHOT"
 stately = "2.1.0" # https://github.com/touchlab/Stately/releases
@@ -17,6 +18,7 @@ rakii = "1.1.0.6-SNAPSHOT"
 [libraries]
 kotlinx-io-bytestring = { module = "org.jetbrains.kotlinx:kotlinx-io-bytestring", version.ref = "kotlinxIo" }
 kotlinx-io-core = { module = "org.jetbrains.kotlinx:kotlinx-io-core", version.ref = "kotlinxIo" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
 stately-common = { module = "co.touchlab:stately-common", version.ref = "stately" }
 stately-collections = { module = "co.touchlab:stately-collections", version.ref = "stately" }
 rakii-runtime = { module = "dev.karmakrafts.rakii:rakii-runtime", version.ref = "rakii" }

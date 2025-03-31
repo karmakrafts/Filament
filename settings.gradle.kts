@@ -38,3 +38,4 @@ dependencyResolutionManagement {
 
 include("filament")
 include("filament-rakii")
+include("filament-coroutines")
