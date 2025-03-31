@@ -30,6 +30,7 @@ internal expect fun tryLockMutex(handle: MutexHandle): Boolean
 
 internal expect fun unlockMutex(handle: MutexHandle)
 
+// TODO: document this
 interface Mutex : Lockable
 
 private class MutexImpl(
@@ -42,4 +43,5 @@ private class MutexImpl(
     override fun unlock() = unlockMutex(handle)
 }
 
+// TODO: document this
 fun Mutex(): Mutex = MutexImpl()

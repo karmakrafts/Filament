@@ -47,6 +47,7 @@ internal class WriteLockable(
     override fun unlock() = mutex.unlockWrite()
 }
 
+// TODO: document this
 interface SharedMutex : Lockable {
     val writeLockable: Lockable
     fun lockWrite()
@@ -54,6 +55,7 @@ interface SharedMutex : Lockable {
     fun unlockWrite()
 }
 
+// TODO: document this
 inline fun <reified R> SharedMutex.guardedWrite(closure: () -> R): R {
     try {
         lockWrite()
@@ -64,6 +66,7 @@ inline fun <reified R> SharedMutex.guardedWrite(closure: () -> R): R {
     }
 }
 
+// TODO: document this
 inline fun <reified R> SharedMutex.tryGuardedWrite(defaultValue: R, closure: () -> R): R {
     if (!tryLockWrite()) return defaultValue
     try {
@@ -93,4 +96,5 @@ private class SharedMutexImpl(
     override fun unlockWrite() = unlockWriteSharedMutex(handle)
 }
 
+// TODO: document this
 fun SharedMutex(): SharedMutex = SharedMutexImpl()

@@ -40,6 +40,7 @@ internal expect fun suspendThread(millis: Long): Long
 
 internal expect fun yieldThread()
 
+// TODO: document this
 interface Thread {
     companion object {
         var name: String
@@ -72,4 +73,5 @@ private class ThreadImpl(
     override fun detach() = detachThread(handle)
 }
 
+// TODO: document this
 fun Thread(function: () -> Unit): Thread = ThreadImpl(createThread(function))

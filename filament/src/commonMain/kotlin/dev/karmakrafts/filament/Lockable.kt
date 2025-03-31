@@ -20,6 +20,7 @@ package dev.karmakrafts.filament
 
 import kotlin.jvm.JvmName
 
+// TODO: document this
 interface Lockable {
     fun lock()
 
@@ -28,20 +29,22 @@ interface Lockable {
     fun unlock()
 }
 
+// TODO: document this
 inline fun <reified R> Lockable.guarded(closure: () -> R): R {
-    try {
+    return try {
         lock()
-        return closure()
+        closure()
     }
     finally {
         unlock()
     }
 }
 
+// TODO: document this
 inline fun <reified R> Lockable.tryGuarded(defaultValue: R, closure: () -> R): R {
     if (!tryLock()) return defaultValue
-    try {
-        return closure()
+    return try {
+        closure()
     }
     finally {
         unlock()

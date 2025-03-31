@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import java.time.ZonedDateTime
 
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.dokka)
+    alias(libs.plugins.rakii)
     signing
     `maven-publish`
 }
@@ -49,34 +49,14 @@ kotlin {
     androidNativeArm64()
     androidNativeX64()
     jvm()
-    targets.filterIsInstance<KotlinNativeTarget>().forEach { target ->
-        target.apply {
-            compilations.getByName("main") {
-                cinterops {
-                    if (konanTarget.family.isAppleFamily) {
-                        val pthread by creating
-                    }
-                }
-            }
-        }
-    }
     applyDefaultHierarchyTemplate()
     sourceSets {
-        val commonMain by getting {
+        commonMain {
             dependencies {
-                implementation(libs.kotlinx.io.bytestring)
-                implementation(libs.kotlinx.io.core)
+                api(project(":filament"))
+                api(libs.rakii.runtime)
             }
         }
-        nativeMain {
-            dependencies {
-                implementation(libs.stately.common)
-                implementation(libs.stately.collections)
-            }
-        }
-        val jvmAndAndroidMain by creating { dependsOn(commonMain) }
-        jvmMain { dependsOn(jvmAndAndroidMain) }
-        androidMain { dependsOn(jvmAndAndroidMain) }
         commonTest {
             dependencies {
                 implementation(kotlin("test"))

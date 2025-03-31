@@ -42,11 +42,21 @@ internal data class GCBox<T>(
                 }
             })
         }
+
+        private fun dropDeadRefs() {
+            val deadRefs = ArrayList<WeakReference<GCBox<*>>>()
+            for(ref in boxes) {
+                if(ref.value != null) continue
+                deadRefs += ref
+            }
+            boxes -= deadRefs
+        }
     }
 
     var isDropped: AtomicBoolean = AtomicBoolean(false)
 
     init {
+        dropDeadRefs()
         boxes += WeakReference(this)
     }
 

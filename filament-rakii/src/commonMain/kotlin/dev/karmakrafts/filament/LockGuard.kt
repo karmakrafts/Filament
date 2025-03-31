@@ -14,27 +14,21 @@
  * limitations under the License.
  */
 
-rootProject.name = "filament"
+package dev.karmakrafts.filament
 
-pluginManagement {
-    repositories {
-        google()
-        mavenCentral()
-        mavenLocal()
-        gradlePluginPortal()
-        maven("https://central.sonatype.com/repository/maven-snapshots")
-    }
+import dev.karmakrafts.rakii.DroppingScope
+
+// TODO: document this
+@Suppress("NOTHING_TO_INLINE")
+inline fun DroppingScope.lockGuard(lockable: Lockable) {
+    lockable.lock()
+    defer(lockable::unlock)
 }
 
-dependencyResolutionManagement {
-    @Suppress("UnstableApiUsage")
-    repositories {
-        google()
-        mavenCentral()
-        mavenLocal()
-        maven("https://central.sonatype.com/repository/maven-snapshots")
-    }
+// TODO: document this
+@Suppress("NOTHING_TO_INLINE")
+inline fun DroppingScope.tryingLockGuard(lockable: Lockable): Boolean {
+    val result = lockable.tryLock()
+    defer(lockable::unlock)
+    return result
 }
-
-include("filament")
-include("filament-rakii")

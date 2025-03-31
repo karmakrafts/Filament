@@ -14,27 +14,31 @@
  * limitations under the License.
  */
 
-rootProject.name = "filament"
+package dev.karmakrafts.filament
 
-pluginManagement {
-    repositories {
-        google()
-        mavenCentral()
-        mavenLocal()
-        gradlePluginPortal()
-        maven("https://central.sonatype.com/repository/maven-snapshots")
+import kotlin.test.Test
+import kotlin.test.assertNotEquals
+
+class ThreadTest {
+    @Test
+    fun `Create and join`() {
+        val thread = Thread {}
+        thread.join()
+    }
+
+    @Test
+    fun `Check current thread ID`() {
+        val id = Thread.id
+        println("Current thread ID: $id")
+        assertNotEquals(0UL, id)
+    }
+
+    @Test
+    fun `Check separate thread ID`() {
+        Thread {
+            val id = Thread.id
+            println("Separate thread ID: $id")
+            assertNotEquals(0UL, id)
+        }.join()
     }
 }
-
-dependencyResolutionManagement {
-    @Suppress("UnstableApiUsage")
-    repositories {
-        google()
-        mavenCentral()
-        mavenLocal()
-        maven("https://central.sonatype.com/repository/maven-snapshots")
-    }
-}
-
-include("filament")
-include("filament-rakii")
