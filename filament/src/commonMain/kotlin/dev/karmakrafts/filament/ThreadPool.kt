@@ -58,9 +58,8 @@ class ThreadPool( // @formatter:off
 
     private fun threadMain() {
         while (_isRunning.load()) {
-            if (tasksMutex.guarded(tasks::size) == 0) Thread.yield()
-            if (tasksMutex.guarded(tasks::size) == 0) continue
             tasksMutex.guarded(tasks::removeFirstOrNull)?.invoke()
+            Thread.yield()
         }
     }
 
