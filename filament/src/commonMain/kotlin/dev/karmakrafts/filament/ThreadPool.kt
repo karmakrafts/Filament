@@ -17,7 +17,10 @@
 package dev.karmakrafts.filament
 
 import kotlin.concurrent.atomics.AtomicBoolean
+import kotlin.concurrent.atomics.AtomicLong
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
+import kotlin.concurrent.atomics.decrementAndFetch
+import kotlin.concurrent.atomics.incrementAndFetch
 
 // TODO: document this
 typealias DispatcherThreadFactory = (block: () -> Unit, index: Int) -> Thread
@@ -34,11 +37,13 @@ class ThreadPool( // @formatter:off
     @PublishedApi
     internal val _isRunning: AtomicBoolean = AtomicBoolean(true)
 
+    private val taskCount: AtomicLong = AtomicLong(0)
+
     @PublishedApi
     internal val tasks: ArrayDeque<() -> Unit> = ArrayDeque()
 
     @PublishedApi
-    internal val tasksMutex: Mutex = Mutex()
+    internal val tasksMutex: SharedMutex = SharedMutex()
 
     inline val activeJobs: List<() -> Unit>
         get() = tasksMutex.guarded { tasks.toCollection(ArrayList()) }
@@ -47,9 +52,10 @@ class ThreadPool( // @formatter:off
         get() = _isRunning.load()
 
     override fun enqueueTask(task: () -> Unit) {
-        tasksMutex.guarded {
+        tasksMutex.guardedWrite {
             tasks += task
         }
+        taskCount.incrementAndFetch()
     }
 
     private val threads: Array<Thread> = Array(parallelism) { index ->
@@ -58,8 +64,11 @@ class ThreadPool( // @formatter:off
 
     private fun threadMain() {
         while (_isRunning.load()) {
-            tasksMutex.guarded(tasks::removeFirstOrNull)?.invoke()
-            Thread.yield()
+            while (_isRunning.load() && taskCount.load() == 0L) Thread.yield()
+            tasksMutex.guardedWrite(tasks::removeFirstOrNull)?.let { block ->
+                block()
+                taskCount.decrementAndFetch()
+            }
         }
     }
 
