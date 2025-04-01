@@ -16,7 +16,14 @@
 
 package dev.karmakrafts.filament
 
-// TODO: document this
-fun interface Executor {
-    fun enqueueTask(task: () -> Unit)
+import java.util.concurrent.Executor as JavaExecutor
+
+fun JavaExecutor.asFilamentExecutor(): Executor = Executor { block ->
+    execute(block)
 }
+
+fun Executor.asJavaExecutor(): JavaExecutor = JavaExecutor { block ->
+    enqueueTask(block::run)
+}
+
+// TODO: ExecutorService interop

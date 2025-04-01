@@ -43,7 +43,7 @@ class ThreadPool( // @formatter:off
     inline val activeJobs: List<() -> Unit>
         get() = tasksMutex.guarded { tasks.toCollection(ArrayList()) }
 
-    override val isRunning: Boolean
+    inline val isRunning: Boolean
         get() = _isRunning.load()
 
     override fun enqueueTask(task: () -> Unit) {
