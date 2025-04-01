@@ -20,5 +20,9 @@ package dev.karmakrafts.filament
 interface Future<T> {
     val value: T?
     val isCompleted: Boolean
-    fun await(): T
+
+    fun await(): T {
+        while (!isCompleted) Thread.yield()
+        return requireNotNull(value) { "Could not await result of CompletableFuture" }
+    }
 }

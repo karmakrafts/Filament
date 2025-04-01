@@ -19,6 +19,7 @@ package dev.karmakrafts.filament
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.yield
 
 // TODO: document this
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -35,7 +36,7 @@ fun <T> Deferred<T>.asFuture(): Future<T> = object : Future<T> {
 }
 
 // TODO: document this
-inline fun <T> CompletableFuture.Companion.async( // @formatter:off
+inline fun <T> CompletableFuture.Companion.asyncSuspend( // @formatter:off
     executor: Executor,
     crossinline block: suspend () -> T
 ): CompletableFuture<T> { // @formatter:on
@@ -44,4 +45,10 @@ inline fun <T> CompletableFuture.Companion.async( // @formatter:off
         runBlocking { future.complete(block()) }
     }
     return future
+}
+
+// TODO: document this
+suspend fun <T> Future<T>.awaitSuspend(): T {
+    while(!isCompleted) yield()
+    return requireNotNull(value) { "Could not await result of Future" }
 }

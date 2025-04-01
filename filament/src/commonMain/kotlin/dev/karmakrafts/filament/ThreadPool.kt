@@ -23,15 +23,15 @@ import kotlin.concurrent.atomics.decrementAndFetch
 import kotlin.concurrent.atomics.incrementAndFetch
 
 // TODO: document this
-typealias DispatcherThreadFactory = (block: () -> Unit, index: Int) -> Thread
+typealias ThreadFactory = (block: () -> Unit, index: Int) -> Thread
 
 // TODO: document this
-val defaultDispatcherThreadFactory: DispatcherThreadFactory = { block, _ -> Thread(block) }
+val defaultThreadFactory: ThreadFactory = { block, _ -> Thread(block) }
 
 // TODO: document this
 @OptIn(ExperimentalAtomicApi::class)
 class ThreadPool( // @formatter:off
-    threadFactory: DispatcherThreadFactory = defaultDispatcherThreadFactory,
+    threadFactory: ThreadFactory = defaultThreadFactory,
     parallelism: Int = 1
 ) : Executor, AutoCloseable { // @formatter:on
     @PublishedApi

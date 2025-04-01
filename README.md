@@ -7,7 +7,8 @@
 )](https://git.karmakrafts.dev/kk/filament/-/packages)
 
 Common `Thread` class (and snychronization primitives) for Kotlin/Multiplatform.
-This allows true, pure parallelism in Kotlin where controlling an OS thread directly is feasable.
+This allows true, pure parallelism in Kotlin where controlling an OS thread directly is feasable.  
+The library also offers various utilities and integration with other libraries.
 
 ### Supported platforms
 
@@ -23,11 +24,30 @@ This allows true, pure parallelism in Kotlin where controlling an OS thread dire
 
 ### Features
 
-- [x] `Thread` General purpose wrapper around system threads.
-- [x] `Mutex` Simple mutex implementation.
-- [x] `SharedMutex` Reentrant read-write lock implementation.
-- [ ] `ConditionVar` Condition variables
-- [ ] `ThreadAttribute` Thread attributes
+- `Thread` as a general purpose wrapper around system threads
+    * `java.lang.Thread` on JVM/Android
+    * [libpthread](https://www.gnu.org/software/hurd/libpthread.html) on Kotlin/Native targets
+    * Unified support for thread names
+    * Unified support for thread IDs
+- `Mutex` as a simple mutex implementation
+    * Lock guards as integration with [RAkII](https://git.karmakrafts.dev/kk/rakii)
+- `SharedMutex` as a reentrant read-write lock implementation
+    * Lock guards as integration with [RAkII](https://git.karmakrafts.dev/kk/rakii)
+- `Executor` interface for bridging different APIs
+- `ThreadPool` as a simple work-stealing thread pool implementation
+    * Default implementation of `Executor`
+- `Future` interface for unifying awaitable objects
+- `CompletableFuture` type with atomic state as a default `Future` implementation
+    * Create uncompleted futures with any default value
+    * Create a value supplying task from an `Executor` and a block
+- [java.util.concurrent](https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/package-summary.html)
+  integration
+    * Use any filament `Executor` as a JVM `Executor`
+- [kotlinx.coroutines](https://github.com/Kotlin/kotlinx.coroutines) integration
+    * Use any `Executor` as a `CoroutineDispatcher`
+    * Use any `Future<T>` as a `Deferred<T>` and vice versa
+    * Use `CompletableFuture.asyncSuspend` to create awaitable objects from a suspend block
+    * Use `Future.awaitSuspend` to await any future by yielding the coroutine
 
 More features may be added in the future. Contributions are welcome! :)
 

@@ -46,11 +46,6 @@ class CompletableFuture<T>( // @formatter:off
         if (!_isCompleted.compareAndSet(expectedValue = false, newValue = true)) return
         this._value.store(value)
     }
-
-    override fun await(): T {
-        while (!_isCompleted.load()) Thread.yield()
-        return requireNotNull(_value.load()) { "Could not await result of CompletableFuture" }
-    }
 }
 
 // TODO: document this
