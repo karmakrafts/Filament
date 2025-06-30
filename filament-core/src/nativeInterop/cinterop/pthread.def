@@ -1,11 +1,10 @@
 package = platform.posix
+
 headers.linux = pthread.h
-headers.android = sched.h
-linkerOpts = -lpthread
+linkerOpts.linux = -lpthread
 compilerOpts.linux = -D_GNU_SOURCE
-compilerOpts.android = -D_GNU_SOURCE
 include.linux = pthread_setaffinity_np, pthread_getaffinity_np
-include.android = sched_setaffinity, sched_getaffinity
+
 exclude = *
 
 ---
