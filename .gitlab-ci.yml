@@ -29,7 +29,7 @@ variables:
     when: never
 
 .if-release: &if-release
-  - if: '$CI_COMMIT_TAG =~ /^\d+\\.\d+\\.\d+$/'
+  - if: '$CI_COMMIT_TAG =~ /^\d+.\d+.\d+.*/'
   - if: $CI_PIPELINE_SOURCE == "schedule"
     when: never
 
@@ -47,7 +47,7 @@ security:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       allow_failure: true
-    - if: '$CI_COMMIT_TAG =~ /^\d+\\.\d+\\.\d+.*/'
+    - if: '$CI_COMMIT_TAG =~ /^\d+.\d+.\d+.*/'
       allow_failure: false
     - if: $CI_PIPELINE_SOURCE == "schedule"
       allow_failure: false
@@ -98,6 +98,16 @@ test-macos:
   tags:
     - macos
 
+test-jvm:
+  stage: test
+  interruptible: true
+  rules:
+    - *if-merge-request-or-main
+  script:
+    - ./gradlew clean jvmTest --stacktrace
+  tags:
+    - macos
+
 test-windows:
   stage: test
   interruptible: true
@@ -135,6 +145,6 @@ publish-documentation:
   rules:
     - *if-release
   script:
-    - ./gradlew -DpublishDocs.root=/var/www/docs/introspekt publishDocs
+    - ./gradlew -DpublishDocs.root=/var/www/docs/filament publishDocs
   tags:
     - docs
