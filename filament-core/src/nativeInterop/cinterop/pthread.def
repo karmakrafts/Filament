@@ -3,9 +3,9 @@ package = platform.posix
 headers.linux = pthread.h
 linkerOpts.linux = -lpthread
 compilerOpts.linux = -D_GNU_SOURCE
-include.linux = pthread_setaffinity_np, pthread_getaffinity_np
 
-exclude = *
+headers.osx = pthread.h
+linkerOpts.osx = -lpthread
 
 ---
 
