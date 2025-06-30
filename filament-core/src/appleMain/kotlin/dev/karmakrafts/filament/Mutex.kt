@@ -18,7 +18,6 @@ package dev.karmakrafts.filament
 
 import kotlinx.cinterop.*
 import platform.posix.*
-import pthread.*
 
 @OptIn(ExperimentalForeignApi::class)
 internal actual fun createMutex(): MutexHandle = NativeMutexHandle(nativeHeap.alloc<pthread_mutex_t> {

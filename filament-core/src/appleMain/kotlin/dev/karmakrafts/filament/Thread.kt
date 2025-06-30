@@ -18,7 +18,6 @@ package dev.karmakrafts.filament
 
 import kotlinx.cinterop.*
 import platform.posix.*
-import pthread.*
 
 @PublishedApi
 internal actual val threadSupportsAffinity: Boolean = false

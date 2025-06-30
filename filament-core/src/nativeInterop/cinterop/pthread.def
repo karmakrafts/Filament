@@ -4,9 +4,6 @@ headers.linux = pthread.h
 linkerOpts.linux = -lpthread
 compilerOpts.linux = -D_GNU_SOURCE
 
-headers.osx = pthread.h
-linkerOpts.osx = -lpthread
-
 ---
 
 #define _GNU_SOURCE

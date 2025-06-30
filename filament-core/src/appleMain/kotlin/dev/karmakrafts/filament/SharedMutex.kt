@@ -18,7 +18,6 @@ package dev.karmakrafts.filament
 
 import kotlinx.cinterop.*
 import platform.posix.*
-import pthread.*
 
 @OptIn(ExperimentalForeignApi::class)
 internal actual fun createSharedMutex(): SharedMutexHandle =
