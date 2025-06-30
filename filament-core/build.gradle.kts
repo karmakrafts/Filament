@@ -15,6 +15,8 @@
  */
 
 import dev.karmakrafts.conventions.configureJava
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
+import org.jetbrains.kotlin.konan.target.Family
 import java.time.ZonedDateTime
 
 plugins {
@@ -51,12 +53,43 @@ kotlin {
     androidNativeArm64()
     androidNativeX64()
     jvm()
+    targets.filterIsInstance<KotlinNativeTarget>().forEach { target ->
+        target.apply {
+            compilations.getByName("main") {
+                cinterops {
+                    val family = konanTarget.family
+                    if (family.isAppleFamily || family == Family.LINUX || family == Family.ANDROID) {
+                        val pthread by creating
+                    }
+                }
+            }
+        }
+    }
     applyDefaultHierarchyTemplate()
     sourceSets {
-        commonMain {
+        val commonMain by getting {
             dependencies {
-                api(project(":filament-core"))
-                api(libs.kotlinx.coroutines.core)
+                implementation(libs.kotlinx.io.bytestring)
+                implementation(libs.kotlinx.io.core)
+            }
+        }
+        nativeMain {
+            dependencies {
+                implementation(libs.stately.concurrent.collections)
+            }
+        }
+        val jvmAndAndroidMain by creating { dependsOn(commonMain) }
+        jvmMain {
+            dependsOn(jvmAndAndroidMain)
+            dependencies {
+                implementation(libs.jna)
+                implementation(libs.jna.platform)
+            }
+        }
+        androidMain {
+            dependsOn(jvmAndAndroidMain)
+            dependencies {
+                implementation("${libs.jna.asProvider().get()}@aar")
             }
         }
         commonTest {

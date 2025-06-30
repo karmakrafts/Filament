@@ -14,29 +14,18 @@
  * limitations under the License.
  */
 
-enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+package dev.karmakrafts.filament
 
-rootProject.name = "filament"
-
-pluginManagement {
-    repositories {
-        google()
-        mavenCentral()
-        mavenLocal()
-        gradlePluginPortal()
-        maven("https://central.sonatype.com/repository/maven-snapshots")
-    }
+/**
+ * An interface for executing tasks asynchronously.
+ * Implementations of this interface provide a way to execute tasks in a separate thread or thread pool.
+ */
+fun interface Executor {
+    /**
+     * Submits a task for execution.
+     * The task will be executed at some point in the future, depending on the implementation.
+     *
+     * @param task The function to be executed.
+     */
+    fun enqueueTask(task: () -> Unit)
 }
-
-@Suppress("UnstableApiUsage")
-dependencyResolutionManagement {
-    repositories {
-        google()
-        mavenCentral()
-        mavenLocal()
-        maven("https://central.sonatype.com/repository/maven-snapshots")
-    }
-}
-
-include("filament-core")
-include("filament-coroutines")

@@ -14,29 +14,19 @@
  * limitations under the License.
  */
 
-enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+package dev.karmakrafts.filament
 
-rootProject.name = "filament"
+import kotlin.test.Test
+import kotlin.test.assertTrue
 
-pluginManagement {
-    repositories {
-        google()
-        mavenCentral()
-        mavenLocal()
-        gradlePluginPortal()
-        maven("https://central.sonatype.com/repository/maven-snapshots")
+class ProcessorTest {
+    @Test
+    fun `Check logical core count`() {
+        assertTrue(Processor.logicalCores > 0)
     }
-}
 
-@Suppress("UnstableApiUsage")
-dependencyResolutionManagement {
-    repositories {
-        google()
-        mavenCentral()
-        mavenLocal()
-        maven("https://central.sonatype.com/repository/maven-snapshots")
-    }
+    //@Test
+    //fun `Check physical core count`() {
+    //    assertTrue(Processor.physicalCores > 0)
+    //}
 }
-
-include("filament-core")
-include("filament-coroutines")

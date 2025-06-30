@@ -14,29 +14,10 @@
  * limitations under the License.
  */
 
-enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+package dev.karmakrafts.filament
 
-rootProject.name = "filament"
+@PublishedApi
+internal actual val isProcessor64Bit: Boolean = System.getProperty("sun.arch.data.model")?.toIntOrNull() == 64
 
-pluginManagement {
-    repositories {
-        google()
-        mavenCentral()
-        mavenLocal()
-        gradlePluginPortal()
-        maven("https://central.sonatype.com/repository/maven-snapshots")
-    }
-}
-
-@Suppress("UnstableApiUsage")
-dependencyResolutionManagement {
-    repositories {
-        google()
-        mavenCentral()
-        mavenLocal()
-        maven("https://central.sonatype.com/repository/maven-snapshots")
-    }
-}
-
-include("filament-core")
-include("filament-coroutines")
+@PublishedApi
+internal actual val logicalProcessorCount: Int = Runtime.getRuntime().availableProcessors()

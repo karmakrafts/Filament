@@ -14,29 +14,14 @@
  * limitations under the License.
  */
 
-enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+package dev.karmakrafts.filament
 
-rootProject.name = "filament"
+import kotlin.experimental.ExperimentalNativeApi
 
-pluginManagement {
-    repositories {
-        google()
-        mavenCentral()
-        mavenLocal()
-        gradlePluginPortal()
-        maven("https://central.sonatype.com/repository/maven-snapshots")
-    }
-}
+@PublishedApi
+@OptIn(ExperimentalNativeApi::class)
+internal actual val isProcessor64Bit: Boolean = Platform.cpuArchitecture.bitness == 64
 
-@Suppress("UnstableApiUsage")
-dependencyResolutionManagement {
-    repositories {
-        google()
-        mavenCentral()
-        mavenLocal()
-        maven("https://central.sonatype.com/repository/maven-snapshots")
-    }
-}
-
-include("filament-core")
-include("filament-coroutines")
+@PublishedApi
+@OptIn(ExperimentalNativeApi::class)
+internal actual val logicalProcessorCount: Int = Platform.getAvailableProcessors()

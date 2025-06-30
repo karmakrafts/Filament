@@ -21,6 +21,12 @@ import kotlinx.coroutines.Runnable
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.coroutines.CoroutineContext
 
+/**
+ * A [CoroutineDispatcher] implementation that delegates task execution to an [Executor].
+ * This class allows using Filament's [Executor] implementations with Kotlin coroutines.
+ *
+ * @property executor The [Executor] to which tasks will be delegated.
+ */
 @OptIn(ExperimentalAtomicApi::class)
 internal class ExecutorDispatcher(private val executor: Executor) : CoroutineDispatcher() {
     override fun dispatch(context: CoroutineContext, block: Runnable) {
@@ -28,5 +34,10 @@ internal class ExecutorDispatcher(private val executor: Executor) : CoroutineDis
     }
 }
 
-// TODO: document this
+/**
+ * Converts this [Executor] to a [CoroutineDispatcher] that can be used with Kotlin coroutines.
+ * This allows using any [Executor] implementation as a coroutine dispatcher.
+ *
+ * @return A [CoroutineDispatcher] that delegates task execution to this [Executor].
+ */
 fun Executor.asDispatcher(): CoroutineDispatcher = ExecutorDispatcher(this)

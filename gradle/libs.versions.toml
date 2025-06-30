@@ -1,28 +1,28 @@
 [versions]
 java = "17"
 
-androidGradle = "8.7.3" # https://developer.android.com/reference/tools/gradle-api
+androidGradle = "8.9.3" # https://developer.android.com/reference/tools/gradle-api
 androidCompileSDK = "35"
 androidMinimalSDK = "28"
 
-filament = "1.2.0"
-kotlin = "2.1.20" # https://github.com/JetBrains/kotlin/releases
+filament = "1.3.0"
+kotlin = "2.1.21" # https://github.com/JetBrains/kotlin/releases
 kotlinxIo = "0.7.0" # https://github.com/Kotlin/kotlinx-io/releases
-kotlinxCoroutines = "1.10.1"
+kotlinxCoroutines = "1.10.2" # https://github.com/Kotlin/kotlinx.coroutines/releases
 dokka = "2.0.0" # https://github.com/Kotlin/dokka/releases
 stately = "2.1.0" # https://github.com/touchlab/Stately/releases
 gradleNexus = "2.0.0" # https://github.com/gradle-nexus/publish-plugin/releases
+jna = "5.17.0"
 
-karmaConventions = "1.3.0.13-SNAPSHOT"
-rakii = "1.1.0.6-SNAPSHOT"
+karmaConventions = "1.5.4"
 
 [libraries]
 kotlinx-io-bytestring = { module = "org.jetbrains.kotlinx:kotlinx-io-bytestring", version.ref = "kotlinxIo" }
 kotlinx-io-core = { module = "org.jetbrains.kotlinx:kotlinx-io-core", version.ref = "kotlinxIo" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
-stately-common = { module = "co.touchlab:stately-common", version.ref = "stately" }
-stately-collections = { module = "co.touchlab:stately-collections", version.ref = "stately" }
-rakii-runtime = { module = "dev.karmakrafts.rakii:rakii-runtime", version.ref = "rakii" }
+stately-concurrent-collections = { module = "co.touchlab:stately-concurrent-collections", version.ref = "stately" }
+jna = { module = "net.java.dev.jna:jna", version.ref = "jna" }
+jna-platform = { module = "net.java.dev.jna:jna-platform", version.ref = "jna" }
 
 [plugins]
 android-library = { id = "com.android.library", version.ref = "androidGradle" }
@@ -30,4 +30,3 @@ kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref 
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 gradleNexus = { id = "io.github.gradle-nexus.publish-plugin", version.ref = "gradleNexus" }
 karmaConventions = { id = "dev.karmakrafts.conventions.karma-conventions", version.ref = "karmaConventions" }
-rakii = { id = "dev.karmakrafts.rakii.rakii-gradle-plugin", version.ref = "rakii" }

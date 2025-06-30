@@ -15,9 +15,10 @@
  */
 
 import dev.karmakrafts.conventions.GitLabCI
-import dev.karmakrafts.conventions.configureJava
+import dev.karmakrafts.conventions.apache2License
 import dev.karmakrafts.conventions.defaultDependencyLocking
 import dev.karmakrafts.conventions.setProjectInfo
+import dev.karmakrafts.conventions.setRepository
 import java.net.URI
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
@@ -26,7 +27,6 @@ plugins {
     alias(libs.plugins.dokka) apply false
     alias(libs.plugins.android.library) apply false
     alias(libs.plugins.kotlin.multiplatform) apply false
-    alias(libs.plugins.rakii) apply false
     alias(libs.plugins.karmaConventions)
     signing
     `maven-publish`
@@ -35,10 +35,6 @@ plugins {
 
 group = "dev.karmakrafts.filament"
 version = GitLabCI.getDefaultVersion(libs.versions.filament)
-
-allprojects {
-    configureJava(rootProject.libs.versions.java)
-}
 
 subprojects {
     apply<PublishingPlugin>()
@@ -50,14 +46,14 @@ subprojects {
 
     publishing {
         setProjectInfo(
-            rootProject.name,
-            "Common Thread class (and snychronization primitives) for Kotlin Multiplatform"
+            rootProject.name, "Common Thread class (and snychronization primitives) for Kotlin Multiplatform"
         )
+        setRepository("github.com", "karmakrafts/filament")
+        apache2License()
         with(GitLabCI) { karmaKraftsDefaults() }
     }
 
-    @OptIn(ExperimentalEncodingApi::class)
-    signing {
+    @OptIn(ExperimentalEncodingApi::class) signing {
         System.getenv("SIGNING_KEY_ID")?.let { keyId ->
             useInMemoryPgpKeys( // @formatter:off
                 keyId,
