@@ -29,11 +29,22 @@ plugins {
 
 configureJava(rootProject.libs.versions.java)
 
+fun KotlinNativeTarget.pthreadInterop() {
+    compilations.getByName("main") {
+        cinterops {
+            val family = konanTarget.family
+            if (family.isAppleFamily || family == Family.LINUX || family == Family.ANDROID) {
+                val pthread by creating
+            }
+        }
+    }
+}
+
 kotlin {
     withSourcesJar(true)
     mingwX64()
-    linuxX64()
-    linuxArm64()
+    linuxX64 { pthreadInterop() }
+    linuxArm64 { pthreadInterop() }
     macosX64()
     macosArm64()
     iosX64()
@@ -53,18 +64,6 @@ kotlin {
     androidNativeArm64()
     androidNativeX64()
     jvm()
-    targets.filterIsInstance<KotlinNativeTarget>().forEach { target ->
-        target.apply {
-            compilations.getByName("main") {
-                cinterops {
-                    val family = konanTarget.family
-                    if (family.isAppleFamily || family == Family.LINUX || family == Family.ANDROID) {
-                        val pthread by creating
-                    }
-                }
-            }
-        }
-    }
     applyDefaultHierarchyTemplate()
     sourceSets {
         val commonMain by getting {
@@ -94,7 +93,7 @@ kotlin {
         }
         commonTest {
             dependencies {
-                implementation(kotlin("test"))
+                implementation(libs.kotlin.test)
             }
         }
     }

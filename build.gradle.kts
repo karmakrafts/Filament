@@ -44,9 +44,7 @@ subprojects {
     if (GitLabCI.isCI) defaultDependencyLocking()
 
     publishing {
-        setProjectInfo(
-            rootProject.name, "Common Thread class (and snychronization primitives) for Kotlin Multiplatform"
-        )
+        setProjectInfo(rootProject.name, "Common Thread class (and snychronization primitives) for Kotlin Multiplatform")
         setRepository("github.com", "karmakrafts/filament")
         apache2License()
         with(GitLabCI) { karmaKraftsDefaults() }
