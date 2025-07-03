@@ -96,7 +96,7 @@ tasks {
             dependsOn(dokkaJar)
             mustRunAfter(dokkaJar)
             from(zipTree(dokkaJar.get().outputs.files.first()))
-            into(docsDir)
+            into("$docsDir/${project.name}")
         }
     }
 }
