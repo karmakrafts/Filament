@@ -16,8 +16,10 @@
 
 package dev.karmakrafts.filament
 
+import co.touchlab.stately.collections.ConcurrentMutableSet
 import kotlinx.cinterop.ByteVar
 import kotlinx.cinterop.COpaquePointer
+import kotlinx.cinterop.COpaquePointerVar
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.StableRef
 import kotlinx.cinterop.alloc
@@ -30,6 +32,7 @@ import kotlinx.cinterop.reinterpret
 import kotlinx.cinterop.staticCFunction
 import kotlinx.cinterop.toKString
 import kotlinx.cinterop.value
+import platform.posix._pthread_tryjoin
 import platform.posix.nanosleep
 import platform.posix.pthread_create
 import platform.posix.pthread_detach
@@ -37,8 +40,11 @@ import platform.posix.pthread_getname_np
 import platform.posix.pthread_join
 import platform.posix.pthread_self
 import platform.posix.pthread_setname_np
+import platform.posix.pthread_t
 import platform.posix.pthread_tVar
 import platform.posix.timespec
+
+private val detachedThreads: ConcurrentMutableSet<pthread_t> = ConcurrentMutableSet()
 
 @PublishedApi
 internal actual val threadSupportsAffinity: Boolean = false
@@ -74,6 +80,7 @@ internal actual fun joinThread(handle: ThreadHandle) {
 internal actual fun detachThread(handle: ThreadHandle) {
     require(handle is NativeThreadHandle)
     pthread_detach(handle.value)
+    detachedThreads += handle.value
 }
 
 @PublishedApi
@@ -104,6 +111,18 @@ internal actual fun suspendThread(millis: Long): Long = memScoped {
     }
     nanosleep(spec.ptr, spec.ptr)
     (spec.tv_sec * 1000) + (spec.tv_nsec / 1000000)
+}
+
+@ExperimentalForeignApi
+internal actual fun isThreadAlive(handle: ThreadHandle): Boolean = memScoped {
+    require(handle is NativeThreadHandle)
+    val result = alloc<COpaquePointerVar>()
+    _pthread_tryjoin(handle.value, result.ptr) != 0
+}
+
+internal actual fun isThreadDetached(handle: ThreadHandle): Boolean {
+    require(handle is NativeThreadHandle)
+    return handle.value in detachedThreads
 }
 
 internal actual fun setThreadAffinity(vararg logicalCores: Int) = Unit

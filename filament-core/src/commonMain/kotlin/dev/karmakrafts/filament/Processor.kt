@@ -24,14 +24,14 @@ internal expect val logicalProcessorCount: Int
 
 /**
  * Provides information about the system's processor.
- * 
+ *
  * This object allows access to various processor-related properties
  * in a platform-independent way.
  */
 object Processor {
     /**
      * Indicates whether the processor architecture is 64-bit.
-     * 
+     *
      * @return `true` if the processor is 64-bit, `false` otherwise.
      */
     inline val is64Bit: Boolean
@@ -39,10 +39,10 @@ object Processor {
 
     /**
      * Returns the number of logical processor cores available to the runtime.
-     * 
+     *
      * This value may be different from the number of physical cores if the processor
      * supports technologies like hyperthreading or similar features.
-     * 
+     *
      * @return The number of logical processor cores.
      */
     inline val logicalCores: Int

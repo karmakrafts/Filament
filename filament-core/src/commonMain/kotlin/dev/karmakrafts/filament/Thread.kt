@@ -45,6 +45,10 @@ internal expect fun yieldThread()
 
 internal expect fun setThreadAffinity(vararg logicalCores: Int)
 
+internal expect fun isThreadAlive(handle: ThreadHandle): Boolean
+
+internal expect fun isThreadDetached(handle: ThreadHandle): Boolean
+
 @PublishedApi
 internal expect val threadSupportsAffinity: Boolean
 
@@ -113,6 +117,17 @@ interface Thread {
     }
 
     /**
+     * True if this thread is running and hasn't been joined.
+     */
+    val isAlive: Boolean
+
+    /**
+     * True if this thread was detached from the parent thread,
+     * meaning it will keep running even if the creating thread terminates.
+     */
+    val isDetached: Boolean
+
+    /**
      * Waits for this thread to die.
      * The calling thread will block until this thread has completed its execution.
      */
@@ -128,6 +143,12 @@ interface Thread {
 private class ThreadImpl(
     private val handle: ThreadHandle
 ) : Thread {
+    override val isAlive: Boolean
+        get() = isThreadAlive(handle)
+
+    override val isDetached: Boolean
+        get() = isThreadDetached(handle)
+
     override fun join() = joinThread(handle)
 
     override fun detach() = detachThread(handle)

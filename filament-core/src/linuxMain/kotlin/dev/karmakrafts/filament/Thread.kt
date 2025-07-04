@@ -16,13 +16,13 @@
 
 package dev.karmakrafts.filament
 
+import co.touchlab.stately.collections.ConcurrentMutableSet
 import kotlinx.cinterop.COpaquePointer
 import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.StableRef
 import kotlinx.cinterop.alloc
 import kotlinx.cinterop.asStableRef
-import kotlinx.cinterop.cValue
 import kotlinx.cinterop.convert
 import kotlinx.cinterop.get
 import kotlinx.cinterop.memScoped
@@ -41,10 +41,15 @@ import platform.posix.pthread_create
 import platform.posix.pthread_detach
 import platform.posix.pthread_join
 import platform.posix.pthread_self
+import platform.posix.pthread_t
 import platform.posix.pthread_tVar
 import platform.posix.syscall
 import platform.posix.timespec
+import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.native.concurrent.ThreadLocal
+
+private val activeThreads: ConcurrentMutableSet<pthread_t> = ConcurrentMutableSet()
+private val detachedThreads: ConcurrentMutableSet<pthread_t> = ConcurrentMutableSet()
 
 @PublishedApi
 internal actual val threadSupportsAffinity: Boolean = true
@@ -52,12 +57,13 @@ internal actual val threadSupportsAffinity: Boolean = true
 @ThreadLocal
 internal var threadName: String? = null
 
-@OptIn(ExperimentalForeignApi::class)
+@OptIn(ExperimentalForeignApi::class, ExperimentalAtomicApi::class)
 private fun threadEntryPoint(userData: COpaquePointer?): COpaquePointer? {
     userData?.asStableRef<() -> Unit>()?.apply {
-        get().invoke()
+        get()()
         dispose()
     }
+    activeThreads -= pthread_self()
     return null
 }
 
@@ -66,11 +72,14 @@ internal actual fun currentThread(): ThreadHandle {
     return NativeThreadHandle(pthread_self())
 }
 
-@OptIn(ExperimentalForeignApi::class)
+@OptIn(ExperimentalForeignApi::class, ExperimentalAtomicApi::class)
 internal actual fun createThread(function: () -> Unit): ThreadHandle = memScoped {
     val handle = alloc<pthread_tVar>()
-    pthread_create(handle.ptr, null, staticCFunction(::threadEntryPoint), StableRef.create(function).asCPointer())
-    NativeThreadHandle(requireNotNull(handle.value) { "Could not create thread" })
+    val closureAddress = StableRef.create(function).asCPointer()
+    pthread_create(handle.ptr, null, staticCFunction(::threadEntryPoint), closureAddress)
+    NativeThreadHandle(requireNotNull(handle.value) { "Could not create thread" }).apply {
+        activeThreads += value
+    }
 }
 
 @OptIn(ExperimentalForeignApi::class)
@@ -83,6 +92,7 @@ internal actual fun joinThread(handle: ThreadHandle) {
 internal actual fun detachThread(handle: ThreadHandle) {
     require(handle is NativeThreadHandle)
     pthread_detach(handle.value)
+    detachedThreads += handle.value
 }
 
 @PublishedApi
@@ -111,6 +121,16 @@ internal actual fun suspendThread(millis: Long): Long = memScoped {
     }
     nanosleep(spec.ptr, spec.ptr)
     (spec.tv_sec * 1000) + (spec.tv_nsec / 1000000)
+}
+
+internal actual fun isThreadAlive(handle: ThreadHandle): Boolean {
+    require(handle is NativeThreadHandle)
+    return handle.value in activeThreads
+}
+
+internal actual fun isThreadDetached(handle: ThreadHandle): Boolean {
+    require(handle is NativeThreadHandle)
+    return handle.value in detachedThreads
 }
 
 // Ported from the __CPUELT macro @see https://github.com/Alexpux/Cygwin/blob/master/winsup/cygwin/include/sys/cpuset.h#L21

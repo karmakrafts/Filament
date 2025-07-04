@@ -71,7 +71,7 @@ private class MutexImpl(
  * Example:
  * ```
  * val mutex = Mutex()
- * 
+ *
  * // Use with explicit lock/unlock
  * mutex.lock()
  * try {
@@ -79,7 +79,7 @@ private class MutexImpl(
  * } finally {
  *     mutex.unlock()
  * }
- * 
+ *
  * // Or use with the guarded extension function
  * mutex.guarded {
  *     // Critical section

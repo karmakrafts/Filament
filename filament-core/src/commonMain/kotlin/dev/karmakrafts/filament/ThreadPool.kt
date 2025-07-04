@@ -48,7 +48,7 @@ val defaultThreadFactory: ThreadFactory = { block, _ -> Thread(block) }
 class ThreadPool( // @formatter:off
     threadFactory: ThreadFactory = defaultThreadFactory,
     parallelism: Int = 1
-) : Executor, AutoCloseable { // @formatter:on
+) : Executor { // @formatter:on
     @PublishedApi
     internal val _isRunning: AtomicBoolean = AtomicBoolean(true)
 

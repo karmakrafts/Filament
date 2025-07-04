@@ -27,8 +27,7 @@ import kotlin.native.ref.WeakReference
 
 @OptIn(ExperimentalNativeApi::class, ExperimentalAtomicApi::class)
 internal data class GCBox<T>(
-    val value: T,
-    private val dropAction: (T) -> Unit
+    val value: T, private val dropAction: (T) -> Unit
 ) {
     @OptIn(ExperimentalForeignApi::class)
     companion object {
@@ -37,16 +36,18 @@ internal data class GCBox<T>(
 
         init {
             atexit(staticCFunction<Unit> { // @formatter:off
-                while (GCBox.boxes.isNotEmpty()) {
-                    GCBox.boxes.removeFirst().value?.drop()
-                } // @formatter:on
+                GCBox.apply {
+                    while (boxes.isNotEmpty()) {
+                        boxes.removeFirst().value?.drop()
+                    } // @formatter:on
+                }
             })
         }
 
         private fun dropDeadRefs() {
             val deadRefs = HashSet<WeakReference<GCBox<*>>>()
-            for(ref in boxes) {
-                if(ref.value != null) continue
+            for (ref in boxes) {
+                if (ref.value != null) continue
                 deadRefs += ref
             }
             boxes -= deadRefs

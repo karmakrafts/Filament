@@ -16,16 +16,13 @@
 
 package dev.karmakrafts.filament
 
+import kotlinx.coroutines.yield
+
 /**
- * An interface for executing tasks asynchronously.
- * Implementations of this interface provide a way to execute tasks in a separate thread or thread pool.
+ * Same as [Thread.yield] except that it yields the
+ * current coroutine instead of blocking the current thread.
  */
-interface Executor : AutoCloseable {
-    /**
-     * Submits a task for execution.
-     * The task will be executed at some point in the future, depending on the implementation.
-     *
-     * @param task The function to be executed.
-     */
-    fun enqueueTask(task: () -> Unit)
+suspend fun Thread.joinSuspend() {
+    // While the thread is still alive, we yield back to the coroutine scheduler
+    while (isAlive) yield()
 }

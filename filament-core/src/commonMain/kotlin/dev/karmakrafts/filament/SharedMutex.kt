@@ -93,8 +93,8 @@ interface SharedMutex : Lockable {
  * Executes the given [closure] while holding the write lock, ensuring the lock is released afterward.
  *
  * This extension function provides a convenient way to execute code within a critical section
- * protected by this [SharedMutex]'s write lock. It automatically acquires the write lock before 
- * executing the closure and guarantees that the lock will be released even if an exception occurs 
+ * protected by this [SharedMutex]'s write lock. It automatically acquires the write lock before
+ * executing the closure and guarantees that the lock will be released even if an exception occurs
  * during execution.
  *
  * Unlike [Lockable.guarded] which uses the read lock, this function uses the write lock,

@@ -24,8 +24,9 @@ import java.util.concurrent.Executor as JavaExecutor
  *
  * @return A Filament Executor that delegates task execution to this Java Executor.
  */
-fun JavaExecutor.asFilamentExecutor(): Executor = Executor { block ->
-    execute(block)
+fun JavaExecutor.asFilamentExecutor(): Executor = object : Executor {
+    override fun enqueueTask(task: () -> Unit) = execute(task)
+    override fun close() = Unit
 }
 
 /**

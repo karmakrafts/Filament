@@ -76,4 +76,14 @@ internal actual fun yieldThread() {
     JavaThread.yield()
 }
 
+internal actual fun isThreadAlive(handle: ThreadHandle): Boolean {
+    require(handle is JvmThreadHandle)
+    return handle.value.isAlive
+}
+
+internal actual fun isThreadDetached(handle: ThreadHandle): Boolean {
+    require(handle is JvmThreadHandle)
+    return handle.value.isDaemon
+}
+
 internal actual fun setThreadAffinity(vararg logicalCores: Int) = Unit

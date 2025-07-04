@@ -19,7 +19,6 @@ package dev.karmakrafts.filament
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.posix.pthread_t
 import platform.posix.sched_yield
-import kotlin.experimental.ExperimentalNativeApi
 
 @OptIn(ExperimentalForeignApi::class)
 internal data class NativeThreadHandle(
