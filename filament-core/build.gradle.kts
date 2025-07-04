@@ -15,6 +15,7 @@
  */
 
 import dev.karmakrafts.conventions.configureJava
+import dev.karmakrafts.conventions.setProjectInfo
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.konan.target.Family
 import java.time.ZonedDateTime
@@ -134,6 +135,7 @@ tasks {
 }
 
 publishing {
+    setProjectInfo("Filament Core", "Common Thread class (and snychronization primitives) for Kotlin Multiplatform")
     publications.withType<MavenPublication> {
         artifact(dokkaJar)
     }

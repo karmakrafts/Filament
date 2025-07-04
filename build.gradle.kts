@@ -18,9 +18,9 @@ import dev.karmakrafts.conventions.GitLabCI
 import dev.karmakrafts.conventions.apache2License
 import dev.karmakrafts.conventions.authenticatedSonatype
 import dev.karmakrafts.conventions.defaultDependencyLocking
-import dev.karmakrafts.conventions.setProjectInfo
 import dev.karmakrafts.conventions.setRepository
 import dev.karmakrafts.conventions.signPublications
+import java.time.Duration
 
 plugins {
     alias(libs.plugins.dokka) apply false
@@ -44,7 +44,6 @@ subprojects {
     if (GitLabCI.isCI) defaultDependencyLocking()
 
     publishing {
-        setProjectInfo(rootProject.name, "Common Thread class (and snychronization primitives) for Kotlin Multiplatform")
         setRepository("github.com", "karmakrafts/filament")
         apache2License()
         with(GitLabCI) { karmaKraftsDefaults() }
@@ -57,4 +56,6 @@ subprojects {
 
 nexusPublishing {
     authenticatedSonatype()
+    connectTimeout = Duration.ofSeconds(30)
+    clientTimeout = Duration.ofMinutes(45)
 }

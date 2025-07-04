@@ -15,6 +15,7 @@
  */
 
 import dev.karmakrafts.conventions.configureJava
+import dev.karmakrafts.conventions.setProjectInfo
 import java.time.ZonedDateTime
 
 plugins {
@@ -102,6 +103,7 @@ tasks {
 }
 
 publishing {
+    setProjectInfo("Filament Coroutines", "kotlinx.coroutines integration for the Filament threading library.")
     publications.withType<MavenPublication> {
         artifact(dokkaJar)
     }
