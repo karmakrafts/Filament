@@ -67,12 +67,7 @@ kotlin {
     jvm()
     applyDefaultHierarchyTemplate()
     sourceSets {
-        val commonMain by getting {
-            dependencies {
-                implementation(libs.kotlinx.io.bytestring)
-                implementation(libs.kotlinx.io.core)
-            }
-        }
+        val commonMain by getting
         nativeMain {
             dependencies {
                 implementation(libs.stately.concurrent.collections)
@@ -135,7 +130,11 @@ tasks {
 }
 
 publishing {
-    setProjectInfo("Filament Core", "Common Thread class (and snychronization primitives) for Kotlin Multiplatform")
+    setProjectInfo(
+        name = "Filament Core",
+        description = "Common Thread class (and snychronization primitives) for Kotlin Multiplatform",
+        url = "https://git.karmakrafts.dev/kk/filament"
+    )
     publications.withType<MavenPublication> {
         artifact(dokkaJar)
     }

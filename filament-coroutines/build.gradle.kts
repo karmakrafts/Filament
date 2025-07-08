@@ -103,7 +103,11 @@ tasks {
 }
 
 publishing {
-    setProjectInfo("Filament Coroutines", "kotlinx.coroutines integration for the Filament threading library.")
+    setProjectInfo(
+        name = "Filament Coroutines",
+        description = "kotlinx.coroutines integration for the Filament threading library",
+        url = "https://git.karmakrafts.dev/kk/filament"
+    )
     publications.withType<MavenPublication> {
         artifact(dokkaJar)
     }

@@ -5,9 +5,8 @@ androidGradle = "8.9.3" # https://developer.android.com/reference/tools/gradle-a
 androidCompileSDK = "35"
 androidMinimalSDK = "28"
 
-filament = "1.4.1"
+filament = "1.4.2"
 kotlin = "2.1.21" # https://github.com/JetBrains/kotlin/releases
-kotlinxIo = "0.7.0" # https://github.com/Kotlin/kotlinx-io/releases
 kotlinxCoroutines = "1.10.2" # https://github.com/Kotlin/kotlinx.coroutines/releases
 dokka = "2.0.0" # https://github.com/Kotlin/dokka/releases
 stately = "2.1.0" # https://github.com/touchlab/Stately/releases
@@ -18,8 +17,6 @@ karmaConventions = "1.5.5"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
-kotlinx-io-bytestring = { module = "org.jetbrains.kotlinx:kotlinx-io-bytestring", version.ref = "kotlinxIo" }
-kotlinx-io-core = { module = "org.jetbrains.kotlinx:kotlinx-io-core", version.ref = "kotlinxIo" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
 stately-concurrent-collections = { module = "co.touchlab:stately-concurrent-collections", version.ref = "stately" }
 jna = { module = "net.java.dev.jna:jna", version.ref = "jna" }
