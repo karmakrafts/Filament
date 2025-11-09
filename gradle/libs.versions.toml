@@ -1,19 +1,19 @@
 [versions]
 java = "17"
 
-androidGradle = "8.9.3" # https://developer.android.com/reference/tools/gradle-api
+androidGradle = "8.12.0" # https://developer.android.com/reference/tools/gradle-api
 androidCompileSDK = "35"
 androidMinimalSDK = "28"
 
-filament = "1.4.2"
-kotlin = "2.1.21" # https://github.com/JetBrains/kotlin/releases
+filament = "1.5.0"
+kotlin = "2.2.21" # https://github.com/JetBrains/kotlin/releases
 kotlinxCoroutines = "1.10.2" # https://github.com/Kotlin/kotlinx.coroutines/releases
-dokka = "2.0.0" # https://github.com/Kotlin/dokka/releases
+dokka = "2.1.0" # https://github.com/Kotlin/dokka/releases
 stately = "2.1.0" # https://github.com/touchlab/Stately/releases
 gradleNexus = "2.0.0" # https://github.com/gradle-nexus/publish-plugin/releases
-jna = "5.17.0"
+jna = "5.18.1" # https://github.com/java-native-access/jna/tags
 
-karmaConventions = "1.5.5"
+karmaConventions = "1.8.0"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
