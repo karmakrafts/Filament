@@ -1,21 +1,22 @@
 [versions]
+
 java = "17"
 
-androidGradle = "8.12.0" # https://developer.android.com/reference/tools/gradle-api
-androidCompileSDK = "35"
+androidGradle = "8.12.3" # https://developer.android.com/reference/tools/gradle-api
+androidCompileSDK = "36"
 androidMinimalSDK = "28"
 
-filament = "1.5.0"
-kotlin = "2.2.21" # https://github.com/JetBrains/kotlin/releases
+filament = "1.6.0"
+kotlin = "2.3.0" # https://github.com/JetBrains/kotlin/releases
 kotlinxCoroutines = "1.10.2" # https://github.com/Kotlin/kotlinx.coroutines/releases
 dokka = "2.1.0" # https://github.com/Kotlin/dokka/releases
+karmaConventions = "1.9.4" # https://github.com/karmakrafts/karma-conventions/tags
 stately = "2.1.0" # https://github.com/touchlab/Stately/releases
 gradleNexus = "2.0.0" # https://github.com/gradle-nexus/publish-plugin/releases
 jna = "5.18.1" # https://github.com/java-native-access/jna/tags
 
-karmaConventions = "1.8.0"
-
 [libraries]
+
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
 stately-concurrent-collections = { module = "co.touchlab:stately-concurrent-collections", version.ref = "stately" }
@@ -23,7 +24,8 @@ jna = { module = "net.java.dev.jna:jna", version.ref = "jna" }
 jna-platform = { module = "net.java.dev.jna:jna-platform", version.ref = "jna" }
 
 [plugins]
-android-library = { id = "com.android.library", version.ref = "androidGradle" }
+
+android-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "androidGradle" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 gradleNexus = { id = "io.github.gradle-nexus.publish-plugin", version.ref = "gradleNexus" }

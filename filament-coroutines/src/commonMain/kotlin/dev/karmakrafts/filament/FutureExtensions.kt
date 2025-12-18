@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Karma Krafts & associates
+ * Copyright 2025 Karma Krafts
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,6 +72,6 @@ inline fun <T> CompletableFuture.Companion.asyncSuspend( // @formatter:off
  * @throws IllegalArgumentException If the future completed but the value is null.
  */
 suspend fun <T> Future<T>.awaitSuspend(): T {
-    while(!isCompleted) yield()
+    while (!isCompleted) yield()
     return requireNotNull(value) { "Could not await result of Future" }
 }
