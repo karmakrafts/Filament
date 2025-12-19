@@ -17,6 +17,7 @@
 import com.android.build.api.dsl.KotlinMultiplatformAndroidCompilation
 import dev.karmakrafts.conventions.asAAR
 import dev.karmakrafts.conventions.configureJava
+import dev.karmakrafts.conventions.defaultDokkaConfig
 import dev.karmakrafts.conventions.setProjectInfo
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
@@ -24,11 +25,13 @@ import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.android.library)
+    alias(libs.plugins.dokka)
     `maven-publish`
     signing
 }
 
 configureJava(rootProject.libs.versions.java)
+defaultDokkaConfig()
 
 fun KotlinNativeTarget.pthreadInterop() {
     compilations.getByName("main") {

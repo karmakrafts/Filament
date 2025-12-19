@@ -15,16 +15,19 @@
  */
 
 import dev.karmakrafts.conventions.configureJava
+import dev.karmakrafts.conventions.defaultDokkaConfig
 import dev.karmakrafts.conventions.setProjectInfo
 
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.android.library)
+    alias(libs.plugins.dokka)
     `maven-publish`
     signing
 }
 
 configureJava(rootProject.libs.versions.java)
+defaultDokkaConfig()
 
 kotlin {
     withSourcesJar(true)

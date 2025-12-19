@@ -18,10 +18,8 @@ import dev.karmakrafts.conventions.GitLabCI
 import dev.karmakrafts.conventions.apache2License
 import dev.karmakrafts.conventions.authenticatedSonatype
 import dev.karmakrafts.conventions.defaultDependencyLocking
-import dev.karmakrafts.conventions.defaultDokkaConfig
 import dev.karmakrafts.conventions.setRepository
 import dev.karmakrafts.conventions.signPublications
-import org.jetbrains.dokka.gradle.DokkaPlugin
 import java.time.Duration
 
 plugins {
@@ -40,12 +38,10 @@ version = GitLabCI.getDefaultVersion(libs.versions.filament)
 subprojects {
     apply<PublishingPlugin>()
     apply<SigningPlugin>()
-    apply<DokkaPlugin>()
 
     group = rootProject.group
     version = rootProject.version
     if (GitLabCI.isCI) defaultDependencyLocking()
-    defaultDokkaConfig()
 
     publishing {
         setRepository("github.com", "karmakrafts/filament")
