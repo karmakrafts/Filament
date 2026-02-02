@@ -1,5 +1,11 @@
 ## [Unreleased]
 
+### Fixed
+
+- Fixed wrong repository URL in changelog update CI task
+
+## [1.7.0]
+
 ### Added
 
 - Added CHANGELOG.md and automatic release notes
