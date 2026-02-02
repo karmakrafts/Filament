@@ -12,6 +12,7 @@ stages:
   - build
   - test
   - publish
+  - release
   - update_changelog
 
 variables:
