@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+## [1.7.1]
+
 ### Fixed
 
 - Fixed wrong repository URL in changelog update CI task
