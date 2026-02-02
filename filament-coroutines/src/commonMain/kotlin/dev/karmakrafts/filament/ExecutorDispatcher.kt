@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Karma Krafts
+ * Copyright 2026 Karma Krafts
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ internal class ExecutorDispatcher(
  * Converts this [Executor] to a [CoroutineDispatcher] that can be used with Kotlin coroutines.
  * This allows using any [Executor] implementation as a coroutine dispatcher.
  *
- * @param A coroutine context
+ * @param parentContext A coroutine context used as the parent context of the newly created Executor.
  * @return A [CoroutineDispatcher] that delegates task execution to this [Executor].
  */
 fun Executor.asDispatcher(

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Karma Krafts
+ * Copyright 2026 Karma Krafts
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,15 @@
  * limitations under the License.
  */
 
-import com.android.build.api.dsl.KotlinMultiplatformAndroidCompilation
+@file:OptIn(ExperimentalKotlinGradlePluginApi::class)
+
 import dev.karmakrafts.conventions.asAAR
 import dev.karmakrafts.conventions.configureJava
 import dev.karmakrafts.conventions.defaultDokkaConfig
+import dev.karmakrafts.conventions.kotlin.defaultCompilerOptions
+import dev.karmakrafts.conventions.kotlin.withAndroidLibrary
+import dev.karmakrafts.conventions.kotlin.withJvm
+import dev.karmakrafts.conventions.kotlin.withNative
 import dev.karmakrafts.conventions.setProjectInfo
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
@@ -36,44 +41,22 @@ defaultDokkaConfig()
 fun KotlinNativeTarget.pthreadInterop() {
     compilations.getByName("main") {
         cinterops {
-            val pthread by creating
+            register("pthread")
         }
     }
 }
 
-@OptIn(ExperimentalKotlinGradlePluginApi::class) //
 kotlin {
-    withSourcesJar(true)
-    jvm()
-    mingwX64()
-    linuxX64 { pthreadInterop() }
-    linuxArm64 { pthreadInterop() }
-    macosX64()
-    macosArm64()
-    iosX64()
-    iosArm64()
-    iosSimulatorArm64()
-    tvosArm64()
-    tvosX64()
-    tvosSimulatorArm64()
-    watchosArm32()
-    watchosArm64()
-    watchosX64()
-    watchosSimulatorArm64()
-    androidLibrary {
-        namespace = "$group.${rootProject.name}"
-        compileSdk = libs.versions.androidCompileSDK.get().toInt()
-        minSdk = libs.versions.androidMinimalSDK.get().toInt()
-    }
-    androidNativeArm32()
-    androidNativeArm64()
-    androidNativeX64()
-    androidNativeX86()
+    defaultCompilerOptions()
+    withSourcesJar()
+    withJvm()
+    withAndroidLibrary()
+    withNative()
     applyDefaultHierarchyTemplate {
         common {
             group("jvmAndAndroid") {
                 withJvm()
-                withCompilations { it is KotlinMultiplatformAndroidCompilation }
+                withAndroidLibrary()
             }
         }
     }

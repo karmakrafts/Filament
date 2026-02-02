@@ -2,15 +2,12 @@
 
 java = "17"
 
-androidGradle = "8.12.3" # https://developer.android.com/reference/tools/gradle-api
-androidCompileSDK = "36"
-androidMinimalSDK = "28"
-
-filament = "1.6.1"
-kotlin = "2.3.0" # https://github.com/JetBrains/kotlin/releases
+filament = "1.7.0"
+kotlin = "2.3.20-Beta2" # https://github.com/JetBrains/kotlin/releases
 kotlinxCoroutines = "1.10.2" # https://github.com/Kotlin/kotlinx.coroutines/releases
-dokka = "2.1.0" # https://github.com/Kotlin/dokka/releases
-karmaConventions = "1.9.4" # https://github.com/karmakrafts/karma-conventions/tags
+androidGradle = "9.0.0" # https://developer.android.com/reference/tools/gradle-api
+dokka = "2.2.0-Beta" # https://github.com/Kotlin/dokka/releases
+karmaConventions = "1.10.17" # https://github.com/karmakrafts/karma-conventions/tags
 stately = "2.1.0" # https://github.com/touchlab/Stately/releases
 gradleNexus = "2.0.0" # https://github.com/gradle-nexus/publish-plugin/releases
 jna = "5.18.1" # https://github.com/java-native-access/jna/tags

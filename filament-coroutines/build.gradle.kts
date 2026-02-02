@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Karma Krafts
+ * Copyright 2026 Karma Krafts
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,10 @@
 
 import dev.karmakrafts.conventions.configureJava
 import dev.karmakrafts.conventions.defaultDokkaConfig
+import dev.karmakrafts.conventions.kotlin.defaultCompilerOptions
+import dev.karmakrafts.conventions.kotlin.withAndroidLibrary
+import dev.karmakrafts.conventions.kotlin.withJvm
+import dev.karmakrafts.conventions.kotlin.withNative
 import dev.karmakrafts.conventions.setProjectInfo
 
 plugins {
@@ -30,32 +34,11 @@ configureJava(rootProject.libs.versions.java)
 defaultDokkaConfig()
 
 kotlin {
-    withSourcesJar(true)
-    mingwX64()
-    linuxX64()
-    linuxArm64()
-    macosX64()
-    macosArm64()
-    iosX64()
-    iosArm64()
-    iosSimulatorArm64()
-    tvosArm64()
-    tvosX64()
-    tvosSimulatorArm64()
-    watchosArm32()
-    watchosArm64()
-    watchosX64()
-    watchosSimulatorArm64()
-    androidLibrary {
-        namespace = "$group.${rootProject.name}"
-        compileSdk = libs.versions.androidCompileSDK.get().toInt()
-        minSdk = libs.versions.androidMinimalSDK.get().toInt()
-    }
-    androidNativeArm32()
-    androidNativeArm64()
-    androidNativeX64()
-    androidNativeX86()
-    jvm()
+    defaultCompilerOptions()
+    withSourcesJar()
+    withAndroidLibrary()
+    withNative()
+    withJvm()
     applyDefaultHierarchyTemplate()
     sourceSets {
         commonMain {
