@@ -5,7 +5,7 @@
 )](https://git.karmakrafts.dev/kk/introspekt/-/packages)
 [![](https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fcentral.sonatype.com%2Frepository%2Fmaven-snapshots%2Fdev%2Fkarmakrafts%2Ffilament%2Ffilament-core%2Fmaven-metadata.xml
 )](https://git.karmakrafts.dev/kk/filament/-/packages)
-[![](https://img.shields.io/badge/2.3.0-blue?logo=kotlin&label=kotlin)](https://kotlinlang.org/)
+[![](https://img.shields.io/badge/2.3.20--Beta2-blue?logo=kotlin&label=kotlin)](https://kotlinlang.org/)
 [![](https://img.shields.io/badge/documentation-black?logo=kotlin)](https://docs.karmakrafts.dev/filament-core)
 
 Common `Thread` class (and snychronization primitives) for Kotlin/Multiplatform.
