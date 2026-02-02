@@ -75,7 +75,7 @@ update_changelog:
       git config user.email "gitlab-ci@example.com"
       git add CHANGELOG.md
       git commit -m "[skip-ci] Update changelog for next release"
-      git push https://gitlab-ci-token:${CI_PUSH_TOKEN}@git.karmakrafts.dev/kk/kmmio.git
+      git push https://gitlab-ci-token:${CI_PUSH_TOKEN}@git.karmakrafts.dev/kk/filament.git
       cd ..
       rm -rf update-changelog
   tags:
