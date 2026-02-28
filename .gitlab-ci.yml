@@ -133,6 +133,7 @@ test:linux:
   tags:
     - linux
     - docker
+    - amd64
 
 test:macos:
   stage: test
@@ -144,6 +145,7 @@ test:macos:
     - ./gradlew clean macosArm64Test jvmTest --stacktrace
   tags:
     - macos
+    - arm64
 
 test:windows:
   stage: test
@@ -155,6 +157,7 @@ test:windows:
     - ./gradlew clean mingwX64Test jvmTest --stacktrace
   tags:
     - windows
+    - amd64
 
 # ------------------------------ Publish
 
