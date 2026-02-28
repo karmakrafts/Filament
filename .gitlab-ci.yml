@@ -129,9 +129,10 @@ test:linux:
     - *if-merge-request
     - *if-main
   script:
-    - ./gradlew clean linuxX64Test jvmTest --stacktrace
+    - gradle clean linuxX64Test jvmTest --stacktrace
   tags:
     - linux
+    - docker
 
 test:macos:
   stage: test
