@@ -18,7 +18,10 @@
 
 package dev.karmakrafts.filament
 
+import dev.karmakrafts.filament.Thread.Companion.sleep
 import kotlin.jvm.JvmName
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 
 internal interface ThreadHandle
 
@@ -106,6 +109,11 @@ interface Thread {
          * @return The actual time slept in milliseconds, which may differ from the requested time.
          */
         fun sleep(millis: Long): Long = suspendThread(millis)
+
+        /**
+         * Same as [sleep], except that it takes and returns a [Duration] for ease-of-use.
+         */
+        fun sleep(duration: Duration): Duration = sleep(duration.inWholeMilliseconds).milliseconds
 
         /**
          * Sets the affinity of the current thread to the specified logical CPU cores.
