@@ -3,6 +3,7 @@
 ### Added
 
 - Convenience overload for `Thread.sleep` which accepts and returns a `Duration`
+- Thread affinity support for Kotlin/Native on Linux
 
 ### Changed
 

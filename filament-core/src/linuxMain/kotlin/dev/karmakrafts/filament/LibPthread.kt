@@ -44,12 +44,6 @@ private typealias _pthread_setaffinity_np = ( // @formatter:off
     cpuSet: CValue<cpu_set_t>
 ) -> Int // @formatter:on
 
-private typealias _pthread_getaffinity_np = ( // @formatter:off
-    thread: pthread_t,
-    cpuSetSize: size_t,
-    cpuSet: CPointer<cpu_set_t>
-) -> Int // @formatter:on
-
 internal object LibPthread {
     private val libraryNames: Array<String> = arrayOf("libc.so", "libc.so.6")
 
@@ -63,11 +57,9 @@ internal object LibPthread {
 
     private val _pthread_setaffinity_np: CPointer<CFunction<_pthread_setaffinity_np>>? =
         dlsym(library, "pthread_setaffinity_np")?.reinterpret()
-    private val _pthread_getaffinity_np: CPointer<CFunction<_pthread_getaffinity_np>>? =
-        dlsym(library, "pthread_getaffinity_np")?.reinterpret()
 
     val isThreadAffinityAvailable: Boolean by lazy {
-        library != null && _pthread_setaffinity_np != null && _pthread_getaffinity_np != null
+        library != null && _pthread_setaffinity_np != null
     }
 
     init {
@@ -82,14 +74,6 @@ internal object LibPthread {
         cpuSetSize: size_t,
         cpuSet: CValue<cpu_set_t>
     ): Int = checkNotNull(_pthread_setaffinity_np) { // @formatter:on
-        "Thread affinity is not available on the current system"
-    }(thread, cpuSetSize, cpuSet)
-
-    fun pthread_getaffinity_np( // @formatter:off
-        thread: pthread_t,
-        cpuSetSize: size_t,
-        cpuSet: CPointer<cpu_set_t>
-    ): Int = checkNotNull(_pthread_getaffinity_np) { // @formatter:on
         "Thread affinity is not available on the current system"
     }(thread, cpuSetSize, cpuSet)
 
