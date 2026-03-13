@@ -66,7 +66,7 @@ internal actual fun getThreadId(): ULong {
     return JavaThread.currentThread().id.toULong()
 }
 
-internal actual fun suspendThread(millis: Long): Long {
+internal actual fun sleepThread(millis: Long): Long {
     val lastTime = System.nanoTime()
     JavaThread.sleep(millis)
     return (System.nanoTime() - lastTime).nanoseconds.toLong(DurationUnit.MILLISECONDS)
@@ -87,3 +87,5 @@ internal actual fun isThreadDetached(handle: ThreadHandle): Boolean {
 }
 
 internal actual fun setThreadAffinity(vararg logicalCores: Int) = Unit
+
+internal actual fun getThreadAffinity(): IntArray = intArrayOf()

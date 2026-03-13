@@ -104,7 +104,7 @@ internal actual fun getThreadId(): ULong {
 }
 
 @ExperimentalForeignApi
-internal actual fun suspendThread(millis: Long): Long = memScoped {
+internal actual fun sleepThread(millis: Long): Long = memScoped {
     val spec = alloc<timespec> {
         tv_sec = millis / 1000
         tv_nsec = (millis % 1000000).toInt()
@@ -126,3 +126,5 @@ internal actual fun isThreadDetached(handle: ThreadHandle): Boolean {
 }
 
 internal actual fun setThreadAffinity(vararg logicalCores: Int) = Unit
+
+internal actual fun getThreadAffinity(): IntArray = intArrayOf()

@@ -4,6 +4,12 @@
 
 - Convenience overload for `Thread.sleep` which accepts and returns a `Duration`
 
+### Changed
+
+- Updated Karma Conventions to 1.14.0
+- Updated Android Gradle to 9.1.0
+- Updated Gradle to 9.4.0
+
 ## [1.7.2]
 
 ### Changed

@@ -42,11 +42,13 @@ internal expect fun getThreadName(): String
 @PublishedApi
 internal expect fun getThreadId(): ULong
 
-internal expect fun suspendThread(millis: Long): Long
+internal expect fun sleepThread(millis: Long): Long
 
 internal expect fun yieldThread()
 
 internal expect fun setThreadAffinity(vararg logicalCores: Int)
+
+internal expect fun getThreadAffinity(): IntArray
 
 internal expect fun isThreadAlive(handle: ThreadHandle): Boolean
 
@@ -108,7 +110,7 @@ interface Thread {
          * @param millis The number of milliseconds to sleep.
          * @return The actual time slept in milliseconds, which may differ from the requested time.
          */
-        fun sleep(millis: Long): Long = suspendThread(millis)
+        fun sleep(millis: Long): Long = sleepThread(millis)
 
         /**
          * Same as [sleep], except that it takes and returns a [Duration] for ease-of-use.
@@ -122,6 +124,15 @@ interface Thread {
          * @param logicalCores The indices of the logical CPU cores to which the thread should be bound.
          */
         fun setAffinity(vararg logicalCores: Int) = setThreadAffinity(*logicalCores)
+
+        /**
+         * Retrieves an array of all logical core indices of cores which the calling
+         * thread is associated with.
+         *
+         * @return An array which contains all logical core indices of all cores associated
+         *  with the calling thread instance.
+         */
+        fun getAffinity(): IntArray = getThreadAffinity()
     }
 
     /**

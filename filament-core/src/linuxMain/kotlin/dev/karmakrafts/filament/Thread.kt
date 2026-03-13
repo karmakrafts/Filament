@@ -18,23 +18,18 @@ package dev.karmakrafts.filament
 
 import co.touchlab.stately.collections.ConcurrentMutableSet
 import kotlinx.cinterop.COpaquePointer
-import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.StableRef
 import kotlinx.cinterop.alloc
 import kotlinx.cinterop.asStableRef
+import kotlinx.cinterop.cValue
 import kotlinx.cinterop.convert
-import kotlinx.cinterop.get
 import kotlinx.cinterop.memScoped
-import kotlinx.cinterop.pointed
 import kotlinx.cinterop.ptr
-import kotlinx.cinterop.set
 import kotlinx.cinterop.sizeOf
 import kotlinx.cinterop.staticCFunction
 import kotlinx.cinterop.value
 import platform.linux.SYS_gettid
-import platform.posix.__NCPUBITS
-import platform.posix.__cpu_mask
 import platform.posix.cpu_set_t
 import platform.posix.nanosleep
 import platform.posix.pthread_create
@@ -52,10 +47,14 @@ private val activeThreads: ConcurrentMutableSet<pthread_t> = ConcurrentMutableSe
 private val detachedThreads: ConcurrentMutableSet<pthread_t> = ConcurrentMutableSet()
 
 @PublishedApi
-internal actual val threadSupportsAffinity: Boolean = true
+internal actual val threadSupportsAffinity: Boolean
+    get() = LibPthread.isThreadAffinityAvailable
 
 @ThreadLocal
 internal var threadName: String? = null
+
+@ThreadLocal
+internal var threadAffinity: IntArray = intArrayOf()
 
 @OptIn(ExperimentalForeignApi::class, ExperimentalAtomicApi::class)
 private fun threadEntryPoint(userData: COpaquePointer?): COpaquePointer? {
@@ -114,7 +113,7 @@ internal actual fun getThreadId(): ULong {
 }
 
 @OptIn(ExperimentalForeignApi::class)
-internal actual fun suspendThread(millis: Long): Long = memScoped {
+internal actual fun sleepThread(millis: Long): Long = memScoped {
     val spec = alloc<timespec> {
         tv_sec = millis / 1000
         tv_nsec = millis % 1000000
@@ -133,28 +132,14 @@ internal actual fun isThreadDetached(handle: ThreadHandle): Boolean {
     return handle.value in detachedThreads
 }
 
-// Ported from the __CPUELT macro @see https://github.com/Alexpux/Cygwin/blob/master/winsup/cygwin/include/sys/cpuset.h#L21
-private fun cpuElt(cpu: Int): Int = cpu / __NCPUBITS.toInt()
-
-// Ported from the __CPUMASK macro @see https://github.com/Alexpux/Cygwin/blob/master/winsup/cygwin/include/sys/cpuset.h#L22
-@OptIn(ExperimentalForeignApi::class)
-private fun cpuMask(cpu: Int): __cpu_mask = 1.convert<__cpu_mask>() shl (cpu % __NCPUBITS.toInt())
-
-// Ported from the CPU_SET macro @see https://github.com/Alexpux/Cygwin/blob/master/winsup/cygwin/include/sys/cpuset.h#L41
-@OptIn(ExperimentalForeignApi::class)
-private fun cpuSet(cpu: Int, set: CPointer<cpu_set_t>) {
-    if (cpu >= 8 * sizeOf<cpu_set_t>()) return
-    set.pointed.apply {
-        val index = cpuElt(cpu)
-        __bits[index] = __bits[index] or cpuMask(cpu)
-    }
-}
-
 @OptIn(ExperimentalForeignApi::class)
 internal actual fun setThreadAffinity(vararg logicalCores: Int) {
-    //pthread_setaffinity_np(pthread_self(), sizeOf<cpu_set_t>().convert(), cValue {
-    //    for (core in logicalCores) {
-    //        cpuSet(core, ptr)
-    //    }
-    //})
+    LibPthread.pthread_setaffinity_np(pthread_self(), sizeOf<cpu_set_t>().convert(), cValue {
+        for (core in logicalCores) {
+            LibPthread.CPU_SET(core, ptr)
+        }
+    })
+    threadAffinity = logicalCores
 }
+
+internal actual fun getThreadAffinity(): IntArray = threadAffinity

@@ -1,9 +1,0 @@
-package = platform.posix
-
-headers.linux = pthread.h
-linkerOpts.linux = -lpthread
-compilerOpts.linux = -D_GNU_SOURCE
-
----
-
-#define _GNU_SOURCE
