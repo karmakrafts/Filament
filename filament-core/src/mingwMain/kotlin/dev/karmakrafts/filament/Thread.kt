@@ -163,11 +163,13 @@ internal actual fun setThreadAffinity(vararg logicalCores: Int) = memScoped {
     val coresPerGroup = GetMaximumProcessorCount(groupCount).toInt()
     val groupIndex = logicalCores[0] / coresPerGroup
 
-    // Save the default affinity group and mask
-    val affinity = alloc<GROUP_AFFINITY>()
-    GetThreadGroupAffinity(handle, affinity.ptr)
-    previousThreadGroup = affinity.Group
-    previousThreadAffinity = affinity.Mask
+    // Save the default affinity group and mask if it's not already saved
+    if (previousThreadGroup == 0U.toUShort() && previousThreadAffinity == 0UL) {
+        val affinity = alloc<GROUP_AFFINITY>()
+        GetThreadGroupAffinity(handle, affinity.ptr)
+        previousThreadGroup = affinity.Group
+        previousThreadAffinity = affinity.Mask
+    }
 
     // Then update to the new custom configuration
     check(SetThreadGroupAffinity(handle, cValue {
