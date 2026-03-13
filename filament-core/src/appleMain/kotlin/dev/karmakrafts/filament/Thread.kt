@@ -136,6 +136,8 @@ internal actual fun isThreadDetached(handle: ThreadHandle): Boolean {
     return handle.value in detachedThreads
 }
 
-internal actual fun setThreadAffinity(vararg logicalCores: Int) = Unit
+internal actual fun setThreadAffinity(vararg logicalCores: Int) {
+
+}
 
 internal actual fun getThreadAffinity(): IntArray = intArrayOf()

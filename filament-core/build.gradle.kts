@@ -63,6 +63,10 @@ kotlin {
                 withJvm()
                 withAndroidLibrary()
             }
+            group("linuxBased") {
+                withLinux()
+                withAndroidNative()
+            }
         }
     }
     sourceSets {

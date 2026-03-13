@@ -19,7 +19,6 @@
 package dev.karmakrafts.filament
 
 import kotlinx.cinterop.CFunction
-import kotlinx.cinterop.COpaquePointer
 import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.CValue
 import kotlinx.cinterop.ExperimentalForeignApi
@@ -28,12 +27,7 @@ import kotlinx.cinterop.invoke
 import kotlinx.cinterop.pointed
 import kotlinx.cinterop.reinterpret
 import kotlinx.cinterop.set
-import kotlinx.cinterop.staticCFunction
-import platform.posix.RTLD_NOW
-import platform.posix.atexit
 import platform.posix.cpu_set_t
-import platform.posix.dlclose
-import platform.posix.dlopen
 import platform.posix.dlsym
 import platform.posix.pthread_t
 import platform.posix.size_t
@@ -45,28 +39,11 @@ private typealias _pthread_setaffinity_np = ( // @formatter:off
 ) -> Int // @formatter:on
 
 internal object LibPthread {
-    private val libraryNames: Array<String> = arrayOf("libc.so", "libc.so.6")
-
-    private val library: COpaquePointer? = run {
-        var address: COpaquePointer? = null
-        for (name in libraryNames) {
-            address = dlopen(name, RTLD_NOW) ?: continue
-        }
-        address
-    }
-
     private val _pthread_setaffinity_np: CPointer<CFunction<_pthread_setaffinity_np>>? =
-        dlsym(library, "pthread_setaffinity_np")?.reinterpret()
+        dlsym(null, "pthread_setaffinity_np")?.reinterpret()
 
     val isThreadAffinityAvailable: Boolean by lazy {
-        library != null && _pthread_setaffinity_np != null
-    }
-
-    init {
-        atexit(staticCFunction<Unit> {
-            val self = LibPthread
-            self.dispose()
-        })
+        _pthread_setaffinity_np != null
     }
 
     fun pthread_setaffinity_np( // @formatter:off
@@ -82,9 +59,5 @@ internal object LibPthread {
         val bit = cpu % ULong.SIZE_BITS
         val mask = set.pointed.__bits[index]
         set.pointed.__bits[index] = mask or (1UL shl bit)
-    }
-
-    private fun dispose() {
-        dlclose(library)
     }
 }
