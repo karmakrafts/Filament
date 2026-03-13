@@ -30,6 +30,7 @@ import kotlinx.cinterop.sizeOf
 import kotlinx.cinterop.staticCFunction
 import kotlinx.cinterop.value
 import platform.linux.SYS_gettid
+import platform.posix._SC_NPROCESSORS_ONLN
 import platform.posix.cpu_set_t
 import platform.posix.nanosleep
 import platform.posix.pthread_create
@@ -39,6 +40,7 @@ import platform.posix.pthread_self
 import platform.posix.pthread_t
 import platform.posix.pthread_tVar
 import platform.posix.syscall
+import platform.posix.sysconf
 import platform.posix.timespec
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.native.concurrent.ThreadLocal
@@ -54,7 +56,7 @@ internal actual val threadSupportsAffinity: Boolean
 internal var threadName: String? = null
 
 @ThreadLocal
-internal var threadAffinity: IntArray = intArrayOf()
+internal var threadAffinity: Int = Thread.NO_AFFINITY
 
 @OptIn(ExperimentalForeignApi::class, ExperimentalAtomicApi::class)
 private fun threadEntryPoint(userData: COpaquePointer?): COpaquePointer? {
@@ -133,13 +135,21 @@ internal actual fun isThreadDetached(handle: ThreadHandle): Boolean {
 }
 
 @OptIn(ExperimentalForeignApi::class)
-internal actual fun setThreadAffinity(vararg logicalCores: Int) {
+internal actual fun setThreadAffinity(logicalCore: Int) {
+    if (logicalCore == Thread.NO_AFFINITY) {
+        val coreCount = sysconf(_SC_NPROCESSORS_ONLN).toInt()
+        LibPthread.pthread_setaffinity_np(pthread_self(), sizeOf<cpu_set_t>().convert(), cValue {
+            for (coreIndex in 0..<coreCount) {
+                LibPthread.CPU_SET(coreIndex, ptr)
+            }
+        })
+        threadAffinity = logicalCore
+        return
+    }
     LibPthread.pthread_setaffinity_np(pthread_self(), sizeOf<cpu_set_t>().convert(), cValue {
-        for (core in logicalCores) {
-            LibPthread.CPU_SET(core, ptr)
-        }
+        LibPthread.CPU_SET(logicalCore, ptr)
     })
-    threadAffinity = logicalCores
+    threadAffinity = logicalCore
 }
 
-internal actual fun getThreadAffinity(): IntArray = threadAffinity
+internal actual fun getThreadAffinity(): Int = threadAffinity

@@ -34,11 +34,18 @@ import kotlinx.cinterop.reinterpret
 import kotlinx.cinterop.staticCFunction
 import kotlinx.cinterop.toKString
 import kotlinx.cinterop.value
+import platform.darwin.KERN_SUCCESS
+import platform.darwin.THREAD_AFFINITY_POLICY
+import platform.darwin.THREAD_AFFINITY_POLICY_COUNT
+import platform.darwin.thread_affinity_policy_data_t
+import platform.darwin.thread_policy_get
+import platform.darwin.thread_policy_set
 import platform.posix.nanosleep
 import platform.posix.pthread_create
 import platform.posix.pthread_detach
 import platform.posix.pthread_getname_np
 import platform.posix.pthread_join
+import platform.posix.pthread_mach_thread_np
 import platform.posix.pthread_self
 import platform.posix.pthread_setname_np
 import platform.posix.pthread_t
@@ -136,8 +143,33 @@ internal actual fun isThreadDetached(handle: ThreadHandle): Boolean {
     return handle.value in detachedThreads
 }
 
-internal actual fun setThreadAffinity(vararg logicalCores: Int) {
-
+// The Darwin kernel does not support per-core affinity like Linux, so we emulate
+// core mappings through thread affinity tags
+@OptIn(ExperimentalForeignApi::class)
+internal actual fun setThreadAffinity(logicalCore: Int) = memScoped {
+    val handle = pthread_mach_thread_np(pthread_self())
+    val policy = alloc<thread_affinity_policy_data_t> {
+        affinity_tag = logicalCore
+    }
+    val result = thread_policy_set( // @formatter:off
+        thread = handle,
+        flavor = THREAD_AFFINITY_POLICY.toUInt(),
+        policy_info = policy.ptr.reinterpret(),
+        policy_infoCnt = THREAD_AFFINITY_POLICY_COUNT
+    ) // @formatter:on
+    check(result == KERN_SUCCESS) { "Could not update thread affinity tag" }
 }
 
-internal actual fun getThreadAffinity(): IntArray = intArrayOf()
+@OptIn(ExperimentalForeignApi::class)
+internal actual fun getThreadAffinity(): Int = memScoped {
+    val handle = pthread_mach_thread_np(pthread_self())
+    val policy = alloc<thread_affinity_policy_data_t>()
+    thread_policy_get(
+        thread = handle,
+        flavor = THREAD_AFFINITY_POLICY.toUInt(),
+        policy_info = policy.ptr.reinterpret(),
+        policy_infoCnt = null,
+        get_default = null
+    )
+    return policy.affinity_tag
+}

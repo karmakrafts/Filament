@@ -46,9 +46,9 @@ internal expect fun sleepThread(millis: Long): Long
 
 internal expect fun yieldThread()
 
-internal expect fun setThreadAffinity(vararg logicalCores: Int)
+internal expect fun setThreadAffinity(logicalCore: Int)
 
-internal expect fun getThreadAffinity(): IntArray
+internal expect fun getThreadAffinity(): Int
 
 internal expect fun isThreadAlive(handle: ThreadHandle): Boolean
 
@@ -63,6 +63,9 @@ internal expect val threadSupportsAffinity: Boolean
  */
 interface Thread {
     companion object {
+        // TODO: document this
+        const val NO_AFFINITY: Int = -1
+
         /**
          * Indicates whether the current platform supports thread affinity.
          * Thread affinity allows binding a thread to specific CPU cores.
@@ -117,22 +120,11 @@ interface Thread {
          */
         fun sleep(duration: Duration): Duration = sleep(duration.inWholeMilliseconds).milliseconds
 
-        /**
-         * Sets the affinity of the current thread to the specified logical CPU cores.
-         * This operation is only effective if thread affinity is supported on the current platform.
-         *
-         * @param logicalCores The indices of the logical CPU cores to which the thread should be bound.
-         */
-        fun setAffinity(vararg logicalCores: Int) = setThreadAffinity(*logicalCores)
+        // TODO: document this
+        fun setAffinity(logicalCore: Int) = setThreadAffinity(logicalCore)
 
-        /**
-         * Retrieves an array of all logical core indices of cores which the calling
-         * thread is associated with.
-         *
-         * @return An array which contains all logical core indices of all cores associated
-         *  with the calling thread instance.
-         */
-        fun getAffinity(): IntArray = getThreadAffinity()
+        // TODO: document this
+        fun getAffinity(): Int = getThreadAffinity()
     }
 
     /**

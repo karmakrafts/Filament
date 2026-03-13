@@ -140,15 +140,11 @@ internal actual fun isThreadDetached(handle: ThreadHandle): Boolean {
 }
 
 @OptIn(ExperimentalForeignApi::class)
-internal actual fun setThreadAffinity(vararg logicalCores: Int) = memScoped {
-    // Since MinGWs pthread wrapper doesn't support pthread_setaffinity_np, we break out into Win32 land
-    // so we can use thread group affinity to handle more than 64 cores.
-    val coreCount = logicalCores.size
-    require(coreCount <= 64) { "Windows does not support thread affinity for more than 64 cores per thread" }
+internal actual fun setThreadAffinity(logicalCore: Int) = memScoped {
     val handle = GetCurrentThread() ?: return@memScoped
 
-    // If no core indices are specified, we restore the default affinity
-    if (coreCount == 0) {
+    // If no affinity is specified, we reset the affinity state
+    if (logicalCore == Thread.NO_AFFINITY) {
         check(SetThreadGroupAffinity(handle, cValue {
             Group = previousThreadGroup
             Mask = previousThreadAffinity
@@ -161,7 +157,7 @@ internal actual fun setThreadAffinity(vararg logicalCores: Int) = memScoped {
     // Calculate the thread group of the first specified core
     val groupCount = GetMaximumProcessorGroupCount()
     val coresPerGroup = GetMaximumProcessorCount(groupCount).toInt()
-    val groupIndex = logicalCores[0] / coresPerGroup
+    val groupIndex = logicalCore / coresPerGroup
 
     // Save the default affinity group and mask if it's not already saved
     if (previousThreadGroup == 0U.toUShort() && previousThreadAffinity == 0UL) {
@@ -174,32 +170,30 @@ internal actual fun setThreadAffinity(vararg logicalCores: Int) = memScoped {
     // Then update to the new custom configuration
     check(SetThreadGroupAffinity(handle, cValue {
         Group = groupIndex.toUShort()
-        for (coreIndex in logicalCores) {
-            val coreGroupIndex = coreIndex / coresPerGroup
-            check(coreGroupIndex == groupIndex) {
-                "Logical core $coreIndex does not belong to thread group $groupIndex"
-            }
-            val coreIndexInGroup = coreIndex % coresPerGroup
-            Mask = Mask or (1UL shl coreIndexInGroup)
+        val coreGroupIndex = logicalCore / coresPerGroup
+        check(coreGroupIndex == groupIndex) {
+            "Logical core $logicalCore does not belong to thread group $groupIndex"
         }
+        val coreIndexInGroup = logicalCore % coresPerGroup
+        Mask = Mask or (1UL shl coreIndexInGroup)
     }, null) != 0) { "Could not set thread affinity" }
 }
 
 @OptIn(ExperimentalForeignApi::class)
-internal actual fun getThreadAffinity(): IntArray = memScoped {
-    val handle = GetCurrentThread() ?: return IntArray(0)
+internal actual fun getThreadAffinity(): Int = memScoped {
+    val handle = GetCurrentThread() ?: return -1
     val affinity = alloc<GROUP_AFFINITY>()
     GetThreadGroupAffinity(handle, affinity.ptr)
-    val cores = ArrayList<Int>()
     val groupCount = GetMaximumProcessorGroupCount().toInt()
     var coreOffset = 0
     for (groupIndex in 0..<groupCount) {
         if (groupIndex != affinity.Group.toInt()) continue
         val coreCount = GetMaximumProcessorCount(groupIndex.toUShort()).toInt()
         for (coreIndex in 0..<coreCount) {
-            cores += coreOffset + coreIndex
+            if (affinity.Mask and (1UL shl coreIndex) == 0UL) continue
+            return coreOffset + coreIndex
         }
         coreOffset += coreCount
     }
-    cores.toIntArray()
+    return -1
 }

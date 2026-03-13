@@ -86,6 +86,6 @@ internal actual fun isThreadDetached(handle: ThreadHandle): Boolean {
     return handle.value.isDaemon
 }
 
-internal actual fun setThreadAffinity(vararg logicalCores: Int) = Unit
+internal actual fun setThreadAffinity(logicalCore: Int) = Unit
 
-internal actual fun getThreadAffinity(): IntArray = intArrayOf()
+internal actual fun getThreadAffinity(): Int = 0
