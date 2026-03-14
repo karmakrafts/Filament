@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalForeignApi::class)
+
 package dev.karmakrafts.filament
 
 import kotlinx.cinterop.ExperimentalForeignApi
@@ -30,49 +32,42 @@ import platform.posix.pthread_rwlock_trywrlock
 import platform.posix.pthread_rwlock_unlock
 import platform.posix.pthread_rwlock_wrlock
 
-@ExperimentalForeignApi
-internal actual fun createSharedMutex(): SharedMutexHandle =
-    NativeSharedMutexHandle(nativeHeap.alloc<pthread_rwlock_t> {
-        pthread_rwlock_init(ptr, null)
-    })
+private class LinuxSharedMutex(
+    val handle: NativeSharedMutexHandle
+) : SharedMutex {
+    override val writeLockable: Lockable
+        get() = WriteLockable(this)
 
-@ExperimentalForeignApi
-internal actual fun lockSharedMutex(handle: SharedMutexHandle) {
-    require(handle is NativeSharedMutexHandle)
-    pthread_rwlock_rdlock(handle.value.ptr)
+    override fun lockWrite() {
+        pthread_rwlock_wrlock(handle.value.ptr)
+    }
+
+    override fun tryLockWrite(): Boolean {
+        return pthread_rwlock_trywrlock(handle.value.ptr) == 1
+    }
+
+    override fun unlockWrite() {
+        pthread_rwlock_unlock(handle.value.ptr)
+    }
+
+    override fun lock() {
+        pthread_rwlock_rdlock(handle.value.ptr)
+    }
+
+    override fun tryLock(): Boolean {
+        return pthread_rwlock_tryrdlock(handle.value.ptr) == 1
+    }
+
+    override fun unlock() {
+        pthread_rwlock_unlock(handle.value.ptr)
+    }
 }
 
-@ExperimentalForeignApi
-internal actual fun tryLockSharedMutex(handle: SharedMutexHandle): Boolean {
-    require(handle is NativeSharedMutexHandle)
-    return pthread_rwlock_tryrdlock(handle.value.ptr) == 1
-}
+actual fun SharedMutex(): SharedMutex = LinuxSharedMutex(NativeSharedMutexHandle(nativeHeap.alloc<pthread_rwlock_t> {
+    pthread_rwlock_init(ptr, null)
+}))
 
-@ExperimentalForeignApi
-internal actual fun unlockSharedMutex(handle: SharedMutexHandle) {
-    require(handle is NativeSharedMutexHandle)
-    pthread_rwlock_unlock(handle.value.ptr)
-}
-
-@ExperimentalForeignApi
-internal actual fun lockWriteSharedMutex(handle: SharedMutexHandle) {
-    require(handle is NativeSharedMutexHandle)
-    pthread_rwlock_wrlock(handle.value.ptr)
-}
-
-@ExperimentalForeignApi
-internal actual fun tryLockWriteSharedMutex(handle: SharedMutexHandle): Boolean {
-    require(handle is NativeSharedMutexHandle)
-    return pthread_rwlock_trywrlock(handle.value.ptr) == 1
-}
-
-@ExperimentalForeignApi
-internal actual fun unlockWriteSharedMutex(handle: SharedMutexHandle) {
-    require(handle is NativeSharedMutexHandle)
-    pthread_rwlock_unlock(handle.value.ptr)
-}
-
-@ExperimentalForeignApi
+@OptIn(ExperimentalForeignApi::class)
 internal actual fun destroySharedMutex(handle: pthread_rwlock_t) {
     pthread_rwlock_destroy(handle.ptr)
     nativeHeap.free(handle)

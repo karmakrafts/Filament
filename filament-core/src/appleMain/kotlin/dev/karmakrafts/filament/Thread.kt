@@ -65,12 +65,12 @@ internal class AppleThread( // @formatter:off
         get() = _isDetached.load()
 
     override fun join() {
-        if (!_isAlive.compareAndSet(expectedValue = true, newValue = false)) return
+        if (!_isAlive.compareAndExchange(expectedValue = true, newValue = false)) return
         pthread_join(handle, null)
     }
 
     override fun detach() {
-        if (!_isDetached.compareAndSet(expectedValue = false, newValue = true)) return
+        if (_isDetached.compareAndExchange(expectedValue = false, newValue = true)) return
         pthread_detach(handle)
     }
 }

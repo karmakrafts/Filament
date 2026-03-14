@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalNativeApi::class)
+
 package dev.karmakrafts.filament
 
 import kotlin.experimental.ExperimentalNativeApi
 
-@PublishedApi
-@OptIn(ExperimentalNativeApi::class)
-internal actual val isProcessor64Bit: Boolean = Platform.cpuArchitecture.bitness == 64
-
-@PublishedApi
-@OptIn(ExperimentalNativeApi::class)
-internal actual val logicalProcessorCount: Int = Platform.getAvailableProcessors()
+actual object Processor {
+    actual val is64Bit: Boolean
+        get() = Platform.cpuArchitecture.bitness == 64
+    actual val logicalCores: Int
+        get() = Platform.getAvailableProcessors()
+}

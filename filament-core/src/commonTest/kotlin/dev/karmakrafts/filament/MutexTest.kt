@@ -26,12 +26,12 @@ class MutexTest {
     @Test
     fun `Set value from another thread`() {
         val thread = Thread {
-            mutex.guarded {
+            mutex.withLock {
                 theValue = 4444
             }
         }
         thread.join()
-        mutex.guarded {
+        mutex.withLock {
             assertEquals(4444, theValue)
         }
     }
@@ -40,12 +40,12 @@ class MutexTest {
     fun `Create multiple mutexes in a loop`() {
         for (index in 0..<1000) {
             val thread = Thread {
-                mutex.guarded {
+                mutex.withLock {
                     theValue = index
                 }
             }
             thread.join()
-            mutex.guarded {
+            mutex.withLock {
                 assertEquals(index, theValue)
             }
         }

@@ -16,15 +16,8 @@
 
 package dev.karmakrafts.filament
 
-import kotlinx.cinterop.ExperimentalForeignApi
 import platform.posix.sched_yield
 
-//@OptIn(ExperimentalForeignApi::class)
-//internal data class NativeThreadHandle(
-//    val value: pthread_t
-//) : ThreadHandle
-
-@OptIn(ExperimentalForeignApi::class)
 internal actual fun yieldThread() {
     sched_yield()
 }

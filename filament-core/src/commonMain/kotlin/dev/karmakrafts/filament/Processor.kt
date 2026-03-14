@@ -16,26 +16,19 @@
 
 package dev.karmakrafts.filament
 
-@PublishedApi
-internal expect val isProcessor64Bit: Boolean
-
-@PublishedApi
-internal expect val logicalProcessorCount: Int
-
 /**
  * Provides information about the system's processor.
  *
  * This object allows access to various processor-related properties
  * in a platform-independent way.
  */
-object Processor {
+expect object Processor {
     /**
      * Indicates whether the processor architecture is 64-bit.
      *
      * @return `true` if the processor is 64-bit, `false` otherwise.
      */
-    inline val is64Bit: Boolean
-        get() = isProcessor64Bit
+    val is64Bit: Boolean
 
     /**
      * Returns the number of logical processor cores available to the runtime.
@@ -45,6 +38,5 @@ object Processor {
      *
      * @return The number of logical processor cores.
      */
-    inline val logicalCores: Int
-        get() = logicalProcessorCount
+    val logicalCores: Int
 }

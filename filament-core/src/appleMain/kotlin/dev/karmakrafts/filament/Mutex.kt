@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalForeignApi::class)
+
 package dev.karmakrafts.filament
 
 import kotlinx.cinterop.ExperimentalForeignApi
@@ -28,31 +30,27 @@ import platform.posix.pthread_mutex_t
 import platform.posix.pthread_mutex_trylock
 import platform.posix.pthread_mutex_unlock
 
-@OptIn(ExperimentalForeignApi::class)
-internal actual fun createMutex(): MutexHandle = NativeMutexHandle(nativeHeap.alloc<pthread_mutex_t> {
-    pthread_mutex_init(ptr, null)
-})
+private class AppleMutex(
+    val handle: NativeMutexHandle
+) : Mutex {
+    override fun lock() {
+        pthread_mutex_lock(handle.value.ptr)
+    }
 
-@OptIn(ExperimentalForeignApi::class)
+    override fun tryLock(): Boolean {
+        return pthread_mutex_trylock(handle.value.ptr) == 1
+    }
+
+    override fun unlock() {
+        pthread_mutex_unlock(handle.value.ptr)
+    }
+}
+
+actual fun Mutex(): Mutex = AppleMutex(NativeMutexHandle(nativeHeap.alloc<pthread_mutex_t> {
+    pthread_mutex_init(ptr, null)
+}))
+
 internal actual fun destroyMutex(handle: pthread_mutex_t) {
     pthread_mutex_destroy(handle.ptr)
     nativeHeap.free(handle)
-}
-
-@OptIn(ExperimentalForeignApi::class)
-internal actual fun lockMutex(handle: MutexHandle) {
-    require(handle is NativeMutexHandle)
-    pthread_mutex_lock(handle.value.ptr)
-}
-
-@OptIn(ExperimentalForeignApi::class)
-internal actual fun tryLockMutex(handle: MutexHandle): Boolean {
-    require(handle is NativeMutexHandle)
-    return pthread_mutex_trylock(handle.value.ptr) == 1
-}
-
-@OptIn(ExperimentalForeignApi::class)
-internal actual fun unlockMutex(handle: MutexHandle) {
-    require(handle is NativeMutexHandle)
-    pthread_mutex_unlock(handle.value.ptr)
 }

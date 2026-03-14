@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalNativeApi::class)
+
 package dev.karmakrafts.filament
 
 import platform.posix.pthread_mutex_t
@@ -26,10 +28,9 @@ internal expect fun destroyMutex(handle: pthread_mutex_t)
 
 internal expect fun destroySharedMutex(handle: pthread_rwlock_t)
 
-@OptIn(ExperimentalNativeApi::class)
 internal class NativeMutexHandle(
     value: pthread_mutex_t
-) : MutexHandle {
+) {
     private val _value: GCBox<pthread_mutex_t> = GCBox(value, ::destroyMutex)
 
     @Suppress("UNUSED")
@@ -39,10 +40,9 @@ internal class NativeMutexHandle(
         get() = _value.value
 }
 
-@OptIn(ExperimentalNativeApi::class)
 internal class NativeSharedMutexHandle(
     value: pthread_rwlock_t
-) : SharedMutexHandle {
+) {
     private val _value: GCBox<pthread_rwlock_t> = GCBox(value, ::destroySharedMutex)
 
     @Suppress("UNUSED")

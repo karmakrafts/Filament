@@ -42,6 +42,9 @@ internal object LibPthread {
     private val _pthread_setaffinity_np: CPointer<CFunction<_pthread_setaffinity_np>>? =
         dlsym(null, "pthread_setaffinity_np")?.reinterpret()
 
+    inline val isThreadAffinityAvailable: Boolean
+        get() = _pthread_setaffinity_np != null
+
     fun pthread_setaffinity_np( // @formatter:off
         thread: pthread_t,
         cpuSetSize: size_t,

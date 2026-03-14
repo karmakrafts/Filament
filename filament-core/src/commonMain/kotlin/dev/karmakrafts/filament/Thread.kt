@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-@file:JvmName("Thread$")
-
 package dev.karmakrafts.filament
 
 import dev.karmakrafts.filament.Thread.Companion.sleep
-import kotlin.jvm.JvmName
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -123,16 +120,7 @@ interface Thread {
     fun detach()
 }
 
-/**
- * Creates and starts a new thread that executes the specified function.
- *
- * This is a factory function that provides a convenient way to create and start a thread
- * with a specific task to execute. The thread begins execution immediately after creation.
- *
- * @param affinity The logical CPU core to which the thread should be bound if supported by the platform.
- * @param function The function to be executed in the new thread.
- * @return A Thread object representing the newly created thread.
- */
+// TODO: document this
 expect fun Thread(
     affinity: Int = Thread.NO_AFFINITY,
     stackSize: Long = Thread.DEFAULT_STACK_SIZE,

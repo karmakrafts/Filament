@@ -14,21 +14,7 @@
  * limitations under the License.
  */
 
-@file:JvmName("Mutex$")
-
 package dev.karmakrafts.filament
-
-import kotlin.jvm.JvmName
-
-internal interface MutexHandle
-
-internal expect fun createMutex(): MutexHandle
-
-internal expect fun lockMutex(handle: MutexHandle)
-
-internal expect fun tryLockMutex(handle: MutexHandle): Boolean
-
-internal expect fun unlockMutex(handle: MutexHandle)
 
 /**
  * A mutual exclusion primitive useful for protecting shared state.
@@ -51,16 +37,6 @@ internal expect fun unlockMutex(handle: MutexHandle)
  * ```
  */
 interface Mutex : Lockable
-
-private class MutexImpl(
-    private val handle: MutexHandle = createMutex()
-) : Mutex {
-    override fun lock() = lockMutex(handle)
-
-    override fun tryLock(): Boolean = tryLockMutex(handle)
-
-    override fun unlock() = unlockMutex(handle)
-}
 
 /**
  * Creates a new [Mutex] instance.
@@ -88,4 +64,4 @@ private class MutexImpl(
  *
  * @return A new [Mutex] instance
  */
-fun Mutex(): Mutex = MutexImpl()
+expect fun Mutex(): Mutex

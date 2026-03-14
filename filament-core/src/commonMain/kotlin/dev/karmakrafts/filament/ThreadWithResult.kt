@@ -16,7 +16,9 @@
 
 package dev.karmakrafts.filament
 
+// TODO: document this
 interface ThreadWithResult<R> : Thread {
+    // TODO: document this
     fun awaitResult(): R
 }
 
@@ -54,8 +56,8 @@ private class ThreadWithResultImpl<R>( // @formatter:off
     }
 }
 
-@Suppress("FunctionName")
-fun <R> Thread(
+// TODO: document this
+fun <R> ThreadWithResult(
     affinity: Int = Thread.NO_AFFINITY,
     stackSize: Long = Thread.DEFAULT_STACK_SIZE,
     detached: Boolean = false,

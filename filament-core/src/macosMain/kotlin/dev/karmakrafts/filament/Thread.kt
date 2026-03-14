@@ -70,12 +70,14 @@ actual fun Thread( // @formatter:off
     }
     val handle = checkNotNull(handleAddress.value) { "Could not obtain thread handle" }
     val kernelThread = pthread_mach_thread_np(handle)
-    val coreCount = sysconf(_SC_NPROCESSORS_ONLN).toInt()
-    check(affinity < coreCount) { "Affinity must be less than the number of logical cores" }
-    val affinityPolicy = alloc<thread_affinity_policy_data_t> {
-        affinity_tag = affinity
+    if (affinity != Thread.NO_AFFINITY) {
+        val coreCount = sysconf(_SC_NPROCESSORS_ONLN).toInt()
+        check(affinity < coreCount) { "Affinity must be less than the number of logical cores" }
+        val affinityPolicy = alloc<thread_affinity_policy_data_t> {
+            affinity_tag = affinity
+        }
+        thread_policy_set(kernelThread, THREAD_AFFINITY_POLICY.toUInt(), affinityPolicy.ptr.reinterpret(), 1U)
     }
-    thread_policy_set(kernelThread, THREAD_AFFINITY_POLICY.toUInt(), affinityPolicy.ptr.reinterpret(), 1U)
     thread_resume(kernelThread)
     threadAffinity = affinity
     AppleThread(handle, affinity)

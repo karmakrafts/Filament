@@ -1,6 +1,6 @@
 [versions]
 
-java = "17"
+java = "21"
 
 filament = "2.0.0"
 kotlin = "2.3.20-RC3" # https://github.com/JetBrains/kotlin/releases

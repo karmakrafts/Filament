@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalNativeApi::class, ExperimentalForeignApi::class)
+
 package dev.karmakrafts.filament
 
 import co.touchlab.stately.collections.ConcurrentMutableList
@@ -21,17 +23,14 @@ import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.staticCFunction
 import platform.posix.atexit
 import kotlin.concurrent.atomics.AtomicBoolean
-import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.experimental.ExperimentalNativeApi
 import kotlin.native.ref.WeakReference
 
-@OptIn(ExperimentalNativeApi::class, ExperimentalAtomicApi::class)
-internal data class GCBox<T>(
-    val value: T, private val dropAction: (T) -> Unit
-) {
-    @OptIn(ExperimentalForeignApi::class)
+internal data class GCBox<T>( // @formatter:off
+    val value: T,
+    private val dropAction: (T) -> Unit
+) { // @formatter:on
     companion object {
-        @OptIn(ExperimentalNativeApi::class)
         private val boxes: ConcurrentMutableList<WeakReference<GCBox<*>>> = ConcurrentMutableList()
 
         init {

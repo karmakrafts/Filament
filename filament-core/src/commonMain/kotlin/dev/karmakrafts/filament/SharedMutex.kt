@@ -14,27 +14,7 @@
  * limitations under the License.
  */
 
-@file:JvmName("SharedMutex$")
-
 package dev.karmakrafts.filament
-
-import kotlin.jvm.JvmName
-
-internal interface SharedMutexHandle
-
-internal expect fun createSharedMutex(): SharedMutexHandle
-
-internal expect fun lockSharedMutex(handle: SharedMutexHandle)
-
-internal expect fun tryLockSharedMutex(handle: SharedMutexHandle): Boolean
-
-internal expect fun unlockSharedMutex(handle: SharedMutexHandle)
-
-internal expect fun lockWriteSharedMutex(handle: SharedMutexHandle)
-
-internal expect fun tryLockWriteSharedMutex(handle: SharedMutexHandle): Boolean
-
-internal expect fun unlockWriteSharedMutex(handle: SharedMutexHandle)
 
 @PublishedApi
 internal class WriteLockable(
@@ -97,7 +77,7 @@ interface SharedMutex : Lockable {
  * executing the closure and guarantees that the lock will be released even if an exception occurs
  * during execution.
  *
- * Unlike [Lockable.guarded] which uses the read lock, this function uses the write lock,
+ * Unlike [Lockable.withLock] which uses the read lock, this function uses the write lock,
  * providing exclusive access with no concurrent readers or writers.
  *
  * Example usage:
@@ -114,7 +94,7 @@ interface SharedMutex : Lockable {
  * @param closure The code block to execute while holding the write lock
  * @return The result of the [closure] execution
  */
-inline fun <reified R> SharedMutex.guardedWrite(closure: () -> R): R {
+inline fun <reified R> SharedMutex.withWriteLock(closure: () -> R): R {
     try {
         lockWrite()
         return closure()
@@ -127,7 +107,7 @@ inline fun <reified R> SharedMutex.guardedWrite(closure: () -> R): R {
 /**
  * Attempts to execute the given [closure] while holding the write lock, returning a [defaultValue] if the lock cannot be acquired.
  *
- * Unlike [guardedWrite], this function does not block if the write lock is already held by another thread
+ * Unlike [withWriteLock], this function does not block if the write lock is already held by another thread
  * or if there are active readers. Instead, it makes a single attempt to acquire the write lock using [SharedMutex.tryLockWrite]:
  * - If successful, it executes the [closure] and returns its result
  * - If unsuccessful, it immediately returns the provided [defaultValue] without executing the closure
@@ -151,7 +131,7 @@ inline fun <reified R> SharedMutex.guardedWrite(closure: () -> R): R {
  * @param closure The code block to execute if the write lock is successfully acquired
  * @return The result of the [closure] execution if the write lock was acquired, or [defaultValue] otherwise
  */
-inline fun <reified R> SharedMutex.tryGuardedWrite(defaultValue: R, closure: () -> R): R {
+inline fun <reified R> SharedMutex.tryWithWriteLock(defaultValue: R, closure: () -> R): R {
     if (!tryLockWrite()) return defaultValue
     try {
         return closure()
@@ -159,25 +139,6 @@ inline fun <reified R> SharedMutex.tryGuardedWrite(defaultValue: R, closure: () 
     finally {
         unlockWrite()
     }
-}
-
-private class SharedMutexImpl(
-    private val handle: SharedMutexHandle = createSharedMutex()
-) : SharedMutex {
-    override val writeLockable: Lockable
-        get() = WriteLockable(this)
-
-    override fun lock() = lockSharedMutex(handle)
-
-    override fun tryLock(): Boolean = tryLockSharedMutex(handle)
-
-    override fun unlock() = unlockSharedMutex(handle)
-
-    override fun lockWrite() = lockWriteSharedMutex(handle)
-
-    override fun tryLockWrite(): Boolean = tryLockWriteSharedMutex(handle)
-
-    override fun unlockWrite() = unlockWriteSharedMutex(handle)
 }
 
 /**
@@ -191,4 +152,4 @@ private class SharedMutexImpl(
  *
  * @return A new [SharedMutex] instance
  */
-fun SharedMutex(): SharedMutex = SharedMutexImpl()
+expect fun SharedMutex(): SharedMutex

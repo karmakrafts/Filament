@@ -14,18 +14,24 @@
  * limitations under the License.
  */
 
+@file:JvmName("ThreadImpl")
+
 package dev.karmakrafts.filament
 
+import kotlin.concurrent.atomics.AtomicInt
+import kotlin.concurrent.atomics.fetchAndIncrement
 import kotlin.time.Duration.Companion.nanoseconds
 import kotlin.time.DurationUnit
 import java.lang.Thread as JavaThread
+
+private val internalThreadId: AtomicInt = AtomicInt(1)
 
 internal val threadAffinity: ThreadLocal<Int> = ThreadLocal.withInitial { Thread.NO_AFFINITY }
 
 internal actual fun currentThread(): Thread = JvmThread(JavaThread.currentThread(), threadAffinity.get())
 
 private class JvmThread( // @formatter:off
-    private val handle: JavaThread,
+    val handle: JavaThread,
     override val affinity: Int
 ) : Thread { // @formatter:on
     override val isAlive: Boolean
@@ -76,9 +82,10 @@ actual fun Thread( // @formatter:off
     function: () -> Unit
 ): Thread { // @formatter:on
     val actualStackSize = if (stackSize == Thread.DEFAULT_STACK_SIZE) 0 else stackSize
-    val handle = JavaThread(null, function, null as String, actualStackSize)
+    val handle = JavaThread(null, function, "Thread ${internalThreadId.fetchAndIncrement()}", actualStackSize)
     val thread = JvmThread(handle, affinity)
-    thread.detach()
+    if (detached) thread.detach()
+    thread.handle.start()
     threadAffinity.set(affinity)
     return thread
 }

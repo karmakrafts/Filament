@@ -16,8 +16,7 @@
 
 package dev.karmakrafts.filament
 
-@PublishedApi
-internal actual val isProcessor64Bit: Boolean = System.getProperty("sun.arch.data.model")?.toIntOrNull() == 64
-
-@PublishedApi
-internal actual val logicalProcessorCount: Int = Runtime.getRuntime().availableProcessors()
+actual object Processor {
+    actual val is64Bit: Boolean = System.getProperty("sun.arch.data.model")?.toIntOrNull() == 64
+    actual val logicalCores: Int = Runtime.getRuntime().availableProcessors()
+}

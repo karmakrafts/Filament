@@ -14,27 +14,18 @@
  * limitations under the License.
  */
 
+@file:JvmName("MutexImpl")
+
 package dev.karmakrafts.filament
 
 import java.util.concurrent.locks.ReentrantLock
 
-internal data class JvmMutexHandle(
-    val value: ReentrantLock
-) : MutexHandle
+private class JvmMutex : Mutex {
+    private val lock: ReentrantLock = ReentrantLock()
 
-internal actual fun createMutex(): MutexHandle = JvmMutexHandle(ReentrantLock())
-
-internal actual fun lockMutex(handle: MutexHandle) {
-    require(handle is JvmMutexHandle)
-    handle.value.lock()
+    override fun lock() = lock.lock()
+    override fun tryLock(): Boolean = lock.tryLock()
+    override fun unlock() = lock.unlock()
 }
 
-internal actual fun tryLockMutex(handle: MutexHandle): Boolean {
-    require(handle is JvmMutexHandle)
-    return handle.value.tryLock()
-}
-
-internal actual fun unlockMutex(handle: MutexHandle) {
-    require(handle is JvmMutexHandle)
-    return handle.value.unlock()
-}
+actual fun Mutex(): Mutex = JvmMutex()

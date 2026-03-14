@@ -18,7 +18,6 @@ package dev.karmakrafts.filament
 
 import kotlin.concurrent.atomics.AtomicBoolean
 import kotlin.concurrent.atomics.AtomicLong
-import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.concurrent.atomics.decrementAndFetch
 import kotlin.concurrent.atomics.incrementAndFetch
 
@@ -44,7 +43,6 @@ val defaultThreadFactory: ThreadFactory = { block, _ -> Thread(function = block)
  * @param threadFactory The factory used to create worker threads. Defaults to [defaultThreadFactory].
  * @param parallelism The number of worker threads in the pool. Defaults to 1.
  */
-@OptIn(ExperimentalAtomicApi::class)
 class ThreadPool( // @formatter:off
     threadFactory: ThreadFactory = defaultThreadFactory,
     parallelism: Int = 1
@@ -67,7 +65,7 @@ class ThreadPool( // @formatter:off
      * @return A list containing all tasks currently in the queue.
      */
     inline val activeJobs: List<() -> Unit>
-        get() = tasksMutex.guarded { tasks.toCollection(ArrayList()) }
+        get() = tasksMutex.withLock { tasks.toCollection(ArrayList()) }
 
     /**
      * Indicates whether the thread pool is currently running.
@@ -85,7 +83,7 @@ class ThreadPool( // @formatter:off
      * @param task The function to be executed.
      */
     override fun enqueueTask(task: () -> Unit) {
-        tasksMutex.guardedWrite {
+        tasksMutex.withWriteLock {
             tasks += task
         }
         taskCount.incrementAndFetch()
@@ -98,7 +96,7 @@ class ThreadPool( // @formatter:off
     private fun threadMain() {
         while (_isRunning.load()) {
             while (_isRunning.load() && taskCount.load() == 0L) Thread.yield()
-            tasksMutex.guardedWrite(tasks::removeFirstOrNull)?.let { block ->
+            tasksMutex.withWriteLock(tasks::removeFirstOrNull)?.let { block ->
                 block()
                 taskCount.decrementAndFetch()
             }

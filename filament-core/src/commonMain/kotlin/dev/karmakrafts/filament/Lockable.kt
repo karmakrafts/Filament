@@ -14,11 +14,7 @@
  * limitations under the License.
  */
 
-@file:JvmName("Lockable$")
-
 package dev.karmakrafts.filament
-
-import kotlin.jvm.JvmName
 
 /**
  * A base interface for synchronization primitives that provide locking mechanisms.
@@ -79,7 +75,7 @@ interface Lockable {
  * @param closure The code block to execute while holding the lock
  * @return The result of the [closure] execution
  */
-inline fun <reified R> Lockable.guarded(closure: () -> R): R {
+inline fun <reified R> Lockable.withLock(closure: () -> R): R {
     return try {
         lock()
         closure()
@@ -92,7 +88,7 @@ inline fun <reified R> Lockable.guarded(closure: () -> R): R {
 /**
  * Attempts to execute the given [closure] while holding the lock, returning a [defaultValue] if the lock cannot be acquired.
  *
- * Unlike [guarded], this function does not block if the lock is already held by another thread.
+ * Unlike [withLock], this function does not block if the lock is already held by another thread.
  * Instead, it makes a single attempt to acquire the lock using [Lockable.tryLock]:
  * - If successful, it executes the [closure] and returns its result
  * - If unsuccessful, it immediately returns the provided [defaultValue] without executing the closure
@@ -115,7 +111,7 @@ inline fun <reified R> Lockable.guarded(closure: () -> R): R {
  * @param closure The code block to execute if the lock is successfully acquired
  * @return The result of the [closure] execution if the lock was acquired, or [defaultValue] otherwise
  */
-inline fun <reified R> Lockable.tryGuarded(defaultValue: R, closure: () -> R): R {
+inline fun <reified R> Lockable.tryWithLock(defaultValue: R, closure: () -> R): R {
     if (!tryLock()) return defaultValue
     return try {
         closure()
