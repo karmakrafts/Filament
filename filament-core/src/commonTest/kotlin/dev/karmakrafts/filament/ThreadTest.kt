@@ -17,6 +17,7 @@
 package dev.karmakrafts.filament
 
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
@@ -51,5 +52,13 @@ class ThreadTest {
             val coreCount = Processor.logicalCores
             assertTrue(coreCount > 0)
         }.join()
+    }
+
+    @Test
+    fun `Thread with result`() {
+        val result = Thread<String> {
+            "Hello, World!"
+        }.awaitResult()
+        assertEquals("Hello, World!", result)
     }
 }

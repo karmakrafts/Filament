@@ -7,6 +7,7 @@
 - Thread affinity support for Kotlin/Native on Windows
 - Thread affinity support for Kotlin/Native on macOS
 - Support for custom thread stack sizes
+- Threads may return a result when explicitly typed during creation
 
 ### Changed
 
