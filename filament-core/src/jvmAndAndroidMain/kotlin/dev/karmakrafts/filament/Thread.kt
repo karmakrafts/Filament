@@ -20,31 +20,24 @@ import kotlin.time.Duration.Companion.nanoseconds
 import kotlin.time.DurationUnit
 import java.lang.Thread as JavaThread
 
-@PublishedApi
-internal actual val threadSupportsAffinity: Boolean = false
+internal val threadAffinity: ThreadLocal<Int> = ThreadLocal.withInitial { Thread.NO_AFFINITY }
 
-internal data class JvmThreadHandle(
-    val value: JavaThread
-) : ThreadHandle
+internal actual fun currentThread(): Thread = JvmThread(JavaThread.currentThread(), threadAffinity.get())
 
-internal actual fun currentThread(): ThreadHandle {
-    return JvmThreadHandle(JavaThread.currentThread())
-}
+private class JvmThread( // @formatter:off
+    private val handle: JavaThread,
+    override val affinity: Int
+) : Thread { // @formatter:on
+    override val isAlive: Boolean
+        get() = handle.isAlive
+    override val isDetached: Boolean
+        get() = handle.isDaemon
 
-internal actual fun createThread(function: () -> Unit): ThreadHandle {
-    return JvmThreadHandle(JavaThread(function).apply {
-        start()
-    })
-}
+    override fun join() = handle.join()
 
-internal actual fun joinThread(handle: ThreadHandle) {
-    require(handle is JvmThreadHandle)
-    handle.value.join()
-}
-
-internal actual fun detachThread(handle: ThreadHandle) {
-    require(handle is JvmThreadHandle)
-    handle.value.isDaemon = true
+    override fun detach() {
+        handle.isDaemon = true
+    }
 }
 
 @PublishedApi
@@ -76,16 +69,16 @@ internal actual fun yieldThread() {
     JavaThread.yield()
 }
 
-internal actual fun isThreadAlive(handle: ThreadHandle): Boolean {
-    require(handle is JvmThreadHandle)
-    return handle.value.isAlive
+actual fun Thread( // @formatter:off
+    affinity: Int,
+    stackSize: Long,
+    detached: Boolean,
+    function: () -> Unit
+): Thread { // @formatter:on
+    val actualStackSize = if (stackSize == Thread.DEFAULT_STACK_SIZE) 0 else stackSize
+    val handle = JavaThread(null, function, null as String, actualStackSize)
+    val thread = JvmThread(handle, affinity)
+    thread.detach()
+    threadAffinity.set(affinity)
+    return thread
 }
-
-internal actual fun isThreadDetached(handle: ThreadHandle): Boolean {
-    require(handle is JvmThreadHandle)
-    return handle.value.isDaemon
-}
-
-internal actual fun setThreadAffinity(logicalCore: Int) = Unit
-
-internal actual fun getThreadAffinity(): Int = 0

@@ -18,8 +18,14 @@ import dev.karmakrafts.conventions.configureJava
 import dev.karmakrafts.conventions.dokka.configureDokka
 import dev.karmakrafts.conventions.kotlin.defaultCompilerOptions
 import dev.karmakrafts.conventions.kotlin.withAndroidLibrary
+import dev.karmakrafts.conventions.kotlin.withAndroidNative
+import dev.karmakrafts.conventions.kotlin.withIos
 import dev.karmakrafts.conventions.kotlin.withJvm
-import dev.karmakrafts.conventions.kotlin.withNative
+import dev.karmakrafts.conventions.kotlin.withLinux
+import dev.karmakrafts.conventions.kotlin.withMacos
+import dev.karmakrafts.conventions.kotlin.withMingw
+import dev.karmakrafts.conventions.kotlin.withTvos
+import dev.karmakrafts.conventions.kotlin.withWatchos
 import dev.karmakrafts.conventions.setProjectInfo
 
 plugins {
@@ -43,7 +49,13 @@ kotlin {
     defaultCompilerOptions()
     withSourcesJar()
     withAndroidLibrary()
-    withNative()
+    withAndroidNative()
+    withLinux()
+    withMingw()
+    withMacos()
+    withIos()
+    withTvos()
+    withWatchos()
     withJvm()
     applyDefaultHierarchyTemplate()
     sourceSets {

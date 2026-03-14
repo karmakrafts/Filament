@@ -23,15 +23,7 @@ import kotlin.jvm.JvmName
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
-internal interface ThreadHandle
-
-internal expect fun currentThread(): ThreadHandle
-
-internal expect fun createThread(function: () -> Unit): ThreadHandle
-
-internal expect fun joinThread(handle: ThreadHandle)
-
-internal expect fun detachThread(handle: ThreadHandle)
+internal expect fun currentThread(): Thread
 
 @PublishedApi
 internal expect fun setThreadName(name: String?)
@@ -46,17 +38,6 @@ internal expect fun sleepThread(millis: Long): Long
 
 internal expect fun yieldThread()
 
-internal expect fun setThreadAffinity(logicalCore: Int)
-
-internal expect fun getThreadAffinity(): Int
-
-internal expect fun isThreadAlive(handle: ThreadHandle): Boolean
-
-internal expect fun isThreadDetached(handle: ThreadHandle): Boolean
-
-@PublishedApi
-internal expect val threadSupportsAffinity: Boolean
-
 /**
  * Represents a thread of execution in a multiprocessing environment.
  * This interface provides a cross-platform API for thread management.
@@ -66,14 +47,8 @@ interface Thread {
         // TODO: document this
         const val NO_AFFINITY: Int = -1
 
-        /**
-         * Indicates whether the current platform supports thread affinity.
-         * Thread affinity allows binding a thread to specific CPU cores.
-         *
-         * @return True if thread affinity is supported, false otherwise.
-         */
-        inline val supportsAffinity: Boolean
-            get() = threadSupportsAffinity
+        // TODO: document this
+        const val DEFAULT_STACK_SIZE: Long = -1L
 
         /**
          * Gets or sets the name of the current thread.
@@ -98,7 +73,7 @@ interface Thread {
          *
          * @return A Thread object representing the current thread.
          */
-        fun current(): Thread = ThreadImpl(currentThread())
+        fun current(): Thread = currentThread()
 
         /**
          * Yields the current thread's execution, allowing other threads to execute.
@@ -119,13 +94,10 @@ interface Thread {
          * Same as [sleep], except that it takes and returns a [Duration] for ease-of-use.
          */
         fun sleep(duration: Duration): Duration = sleep(duration.inWholeMilliseconds).milliseconds
-
-        // TODO: document this
-        fun setAffinity(logicalCore: Int) = setThreadAffinity(logicalCore)
-
-        // TODO: document this
-        fun getAffinity(): Int = getThreadAffinity()
     }
+
+    // TODO: document this
+    val affinity: Int
 
     /**
      * True if this thread is running and hasn't been joined.
@@ -151,27 +123,19 @@ interface Thread {
     fun detach()
 }
 
-private class ThreadImpl(
-    private val handle: ThreadHandle
-) : Thread {
-    override val isAlive: Boolean
-        get() = isThreadAlive(handle)
-
-    override val isDetached: Boolean
-        get() = isThreadDetached(handle)
-
-    override fun join() = joinThread(handle)
-
-    override fun detach() = detachThread(handle)
-}
-
 /**
  * Creates and starts a new thread that executes the specified function.
  *
  * This is a factory function that provides a convenient way to create and start a thread
  * with a specific task to execute. The thread begins execution immediately after creation.
  *
+ * @param affinity The logical CPU core to which the thread should be bound if supported by the platform.
  * @param function The function to be executed in the new thread.
  * @return A Thread object representing the newly created thread.
  */
-fun Thread(function: () -> Unit): Thread = ThreadImpl(createThread(function))
+expect fun Thread(
+    affinity: Int = Thread.NO_AFFINITY,
+    stackSize: Long = Thread.DEFAULT_STACK_SIZE,
+    detached: Boolean = false,
+    function: () -> Unit
+): Thread

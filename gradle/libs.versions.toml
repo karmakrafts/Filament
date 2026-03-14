@@ -2,7 +2,7 @@
 
 java = "17"
 
-filament = "1.8.0"
+filament = "2.0.0"
 kotlin = "2.3.20-RC3" # https://github.com/JetBrains/kotlin/releases
 kotlinxCoroutines = "1.10.2" # https://github.com/Kotlin/kotlinx.coroutines/releases
 androidGradle = "9.1.0" # https://developer.android.com/reference/tools/gradle-api

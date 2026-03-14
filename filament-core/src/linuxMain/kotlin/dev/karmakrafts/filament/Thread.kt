@@ -16,41 +16,21 @@
 
 package dev.karmakrafts.filament
 
-import co.touchlab.stately.collections.ConcurrentMutableSet
 import kotlinx.cinterop.COpaquePointer
 import kotlinx.cinterop.ExperimentalForeignApi
-import kotlinx.cinterop.StableRef
 import kotlinx.cinterop.alloc
 import kotlinx.cinterop.asStableRef
-import kotlinx.cinterop.cValue
 import kotlinx.cinterop.convert
 import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.ptr
-import kotlinx.cinterop.sizeOf
-import kotlinx.cinterop.staticCFunction
-import kotlinx.cinterop.value
 import platform.linux.SYS_gettid
-import platform.posix._SC_NPROCESSORS_ONLN
-import platform.posix.cpu_set_t
 import platform.posix.nanosleep
-import platform.posix.pthread_create
-import platform.posix.pthread_detach
-import platform.posix.pthread_join
 import platform.posix.pthread_self
 import platform.posix.pthread_t
-import platform.posix.pthread_tVar
 import platform.posix.syscall
-import platform.posix.sysconf
 import platform.posix.timespec
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.native.concurrent.ThreadLocal
-
-private val activeThreads: ConcurrentMutableSet<pthread_t> = ConcurrentMutableSet()
-private val detachedThreads: ConcurrentMutableSet<pthread_t> = ConcurrentMutableSet()
-
-@PublishedApi
-internal actual val threadSupportsAffinity: Boolean
-    get() = LibPthread.isThreadAffinityAvailable
 
 @ThreadLocal
 internal var threadName: String? = null
@@ -58,43 +38,62 @@ internal var threadName: String? = null
 @ThreadLocal
 internal var threadAffinity: Int = Thread.NO_AFFINITY
 
+internal actual fun currentThread(): Thread = LinuxThread(pthread_self(), threadAffinity)
+
+private class LinuxThread( // @formatter:off
+    val handle: pthread_t,
+    override val affinity: Int
+) : Thread { // @formatter:on
+    override val isAlive: Boolean
+        get() = TODO("Not yet implemented")
+    override val isDetached: Boolean
+        get() = TODO("Not yet implemented")
+
+    override fun join() {
+        TODO("Not yet implemented")
+    }
+
+    override fun detach() {
+        TODO("Not yet implemented")
+    }
+}
+
 @OptIn(ExperimentalForeignApi::class, ExperimentalAtomicApi::class)
-private fun threadEntryPoint(userData: COpaquePointer?): COpaquePointer? {
+private fun threadTrampoline(userData: COpaquePointer?): COpaquePointer? {
     userData?.asStableRef<() -> Unit>()?.apply {
         get()()
         dispose()
     }
-    activeThreads -= pthread_self()
     return null
 }
 
-@OptIn(ExperimentalForeignApi::class)
-internal actual fun currentThread(): ThreadHandle {
-    return NativeThreadHandle(pthread_self())
-}
-
-@OptIn(ExperimentalForeignApi::class, ExperimentalAtomicApi::class)
-internal actual fun createThread(function: () -> Unit): ThreadHandle = memScoped {
-    val handle = alloc<pthread_tVar>()
-    val closureAddress = StableRef.create(function).asCPointer()
-    pthread_create(handle.ptr, null, staticCFunction(::threadEntryPoint), closureAddress)
-    NativeThreadHandle(requireNotNull(handle.value) { "Could not create thread" }).apply {
-        activeThreads += value
-    }
-}
-
-@OptIn(ExperimentalForeignApi::class)
-internal actual fun joinThread(handle: ThreadHandle) {
-    require(handle is NativeThreadHandle)
-    pthread_join(handle.value, null)
-}
-
-@OptIn(ExperimentalForeignApi::class)
-internal actual fun detachThread(handle: ThreadHandle) {
-    require(handle is NativeThreadHandle)
-    pthread_detach(handle.value)
-    detachedThreads += handle.value
-}
+//@OptIn(ExperimentalForeignApi::class)
+//internal actual fun currentThread(): ThreadHandle {
+//    return NativeThreadHandle(pthread_self())
+//}
+//
+//@OptIn(ExperimentalForeignApi::class, ExperimentalAtomicApi::class)
+//internal actual fun createThread(function: () -> Unit): ThreadHandle = memScoped {
+//    val handle = alloc<pthread_tVar>()
+//    val closureAddress = StableRef.create(function).asCPointer()
+//    pthread_create(handle.ptr, null, staticCFunction(::threadEntryPoint), closureAddress)
+//    NativeThreadHandle(requireNotNull(handle.value) { "Could not create thread" }).apply {
+//        activeThreads += value
+//    }
+//}
+//
+//@OptIn(ExperimentalForeignApi::class)
+//internal actual fun joinThread(handle: ThreadHandle) {
+//    require(handle is NativeThreadHandle)
+//    pthread_join(handle.value, null)
+//}
+//
+//@OptIn(ExperimentalForeignApi::class)
+//internal actual fun detachThread(handle: ThreadHandle) {
+//    require(handle is NativeThreadHandle)
+//    pthread_detach(handle.value)
+//    detachedThreads += handle.value
+//}
 
 @PublishedApi
 @OptIn(ExperimentalForeignApi::class)
@@ -124,32 +123,41 @@ internal actual fun sleepThread(millis: Long): Long = memScoped {
     (spec.tv_sec * 1000) + (spec.tv_nsec / 1000000)
 }
 
-internal actual fun isThreadAlive(handle: ThreadHandle): Boolean {
-    require(handle is NativeThreadHandle)
-    return handle.value in activeThreads
+actual fun Thread( // @formatter:off
+    affinity: Int,
+    stackSize: Long,
+    detached: Boolean,
+    function: () -> Unit
+): Thread { // @formatter:on
+    TODO()
 }
 
-internal actual fun isThreadDetached(handle: ThreadHandle): Boolean {
-    require(handle is NativeThreadHandle)
-    return handle.value in detachedThreads
-}
-
-@OptIn(ExperimentalForeignApi::class)
-internal actual fun setThreadAffinity(logicalCore: Int) {
-    if (logicalCore == Thread.NO_AFFINITY) {
-        val coreCount = sysconf(_SC_NPROCESSORS_ONLN).toInt()
-        LibPthread.pthread_setaffinity_np(pthread_self(), sizeOf<cpu_set_t>().convert(), cValue {
-            for (coreIndex in 0..<coreCount) {
-                LibPthread.CPU_SET(coreIndex, ptr)
-            }
-        })
-        threadAffinity = logicalCore
-        return
-    }
-    LibPthread.pthread_setaffinity_np(pthread_self(), sizeOf<cpu_set_t>().convert(), cValue {
-        LibPthread.CPU_SET(logicalCore, ptr)
-    })
-    threadAffinity = logicalCore
-}
-
-internal actual fun getThreadAffinity(): Int = threadAffinity
+//internal actual fun isThreadAlive(handle: ThreadHandle): Boolean {
+//    require(handle is NativeThreadHandle)
+//    return handle.value in activeThreads
+//}
+//
+//internal actual fun isThreadDetached(handle: ThreadHandle): Boolean {
+//    require(handle is NativeThreadHandle)
+//    return handle.value in detachedThreads
+//}
+//
+//@OptIn(ExperimentalForeignApi::class)
+//internal actual fun setThreadAffinity(logicalCore: Int) {
+//    if (logicalCore == Thread.NO_AFFINITY) {
+//        val coreCount = sysconf(_SC_NPROCESSORS_ONLN).toInt()
+//        LibPthread.pthread_setaffinity_np(pthread_self(), sizeOf<cpu_set_t>().convert(), cValue {
+//            for (coreIndex in 0..<coreCount) {
+//                LibPthread.CPU_SET(coreIndex, ptr)
+//            }
+//        })
+//        threadAffinity = logicalCore
+//        return
+//    }
+//    LibPthread.pthread_setaffinity_np(pthread_self(), sizeOf<cpu_set_t>().convert(), cValue {
+//        LibPthread.CPU_SET(logicalCore, ptr)
+//    })
+//    threadAffinity = logicalCore
+//}
+//
+//internal actual fun getThreadAffinity(): Int = threadAffinity

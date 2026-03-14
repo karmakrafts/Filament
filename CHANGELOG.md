@@ -5,7 +5,8 @@
 - Convenience overload for `Thread.sleep` which accepts and returns a `Duration`
 - Thread affinity support for Kotlin/Native on Linux
 - Thread affinity support for Kotlin/Native on Windows
-- Emulated thread affinity support for Kotlin/Native on macOS, iOS, tvOS and watchOS
+- Thread affinity support for Kotlin/Native on macOS
+- Support for custom thread stack sizes
 
 ### Changed
 

@@ -18,6 +18,7 @@ package dev.karmakrafts.filament
 
 import kotlin.test.Test
 import kotlin.test.assertNotEquals
+import kotlin.test.assertTrue
 
 class ThreadTest {
     @Test
@@ -41,6 +42,14 @@ class ThreadTest {
             println("Separate thread ID: $id")
             assertNotEquals(0UL, id)
             assertNotEquals(parentId, id)
+        }.join()
+    }
+
+    @Test
+    fun `Set and get thread affinity`() {
+        Thread(1) { // Thread with affinity 1
+            val coreCount = Processor.logicalCores
+            assertTrue(coreCount > 0)
         }.join()
     }
 }

@@ -18,10 +18,9 @@ The library also offers various utilities and integration with other libraries.
     * Support for querying the logical core count
 - `Thread` as a general purpose wrapper around system threads
     * `java.lang.Thread` on JVM/Android
-    * [libpthread](https://www.gnu.org/software/hurd/libpthread.html) on Kotlin/Native targets
     * Unified support for thread names
     * Unified support for thread IDs
-    * Support for setting thread affinity (pinning)
+    * Support for setting thread affinity
 - `Mutex` as a simple mutex implementation
 - `SharedMutex` as a reentrant read-write lock implementation
 - `Executor` interface for bridging different APIs
