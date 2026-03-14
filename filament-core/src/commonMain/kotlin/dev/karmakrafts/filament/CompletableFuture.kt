@@ -18,7 +18,6 @@ package dev.karmakrafts.filament
 
 import kotlin.concurrent.atomics.AtomicBoolean
 import kotlin.concurrent.atomics.AtomicReference
-import kotlin.concurrent.atomics.ExperimentalAtomicApi
 
 /**
  * A future implementation that can be completed manually.
@@ -27,7 +26,6 @@ import kotlin.concurrent.atomics.ExperimentalAtomicApi
  * @param T The type of the value that the future will complete with.
  * @param defaultValue The initial value of the future, defaults to null.
  */
-@OptIn(ExperimentalAtomicApi::class)
 class CompletableFuture<T>( // @formatter:off
     defaultValue: T? = null
 ) : Future<T> { // @formatter:on
