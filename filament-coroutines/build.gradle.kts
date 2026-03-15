@@ -24,6 +24,7 @@ import dev.karmakrafts.conventions.kotlin.withJvm
 import dev.karmakrafts.conventions.kotlin.withLinux
 import dev.karmakrafts.conventions.kotlin.withMacos
 import dev.karmakrafts.conventions.kotlin.withMingw
+import dev.karmakrafts.conventions.kotlin.withNative
 import dev.karmakrafts.conventions.kotlin.withTvos
 import dev.karmakrafts.conventions.kotlin.withWatchos
 import dev.karmakrafts.conventions.setProjectInfo
@@ -49,13 +50,7 @@ kotlin {
     defaultCompilerOptions()
     withSourcesJar()
     withAndroidLibrary()
-    withAndroidNative()
-    withLinux()
-    withMingw()
-    withMacos()
-    withIos()
-    withTvos()
-    withWatchos()
+    withNative()
     withJvm()
     applyDefaultHierarchyTemplate()
     sourceSets {

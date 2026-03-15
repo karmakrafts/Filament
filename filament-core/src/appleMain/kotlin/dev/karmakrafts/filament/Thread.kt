@@ -90,7 +90,7 @@ internal actual fun setThreadName(name: String?) {
 
 @PublishedApi
 internal actual fun getThreadName(): String = memScoped {
-    val nameBuffer = allocArray<ByteVar>(4096).reinterpret<ByteVar>().pointed
+    val nameBuffer = allocArray<ByteVar>(4096).pointed
     pthread_getname_np(pthread_self(), nameBuffer.ptr, 4096U)
     return nameBuffer.ptr.toKString().ifBlank { "Thread ${getThreadId()}" }
 }
@@ -110,34 +110,3 @@ internal actual fun sleepThread(millis: Long): Long = memScoped {
     nanosleep(spec.ptr, spec.ptr)
     (spec.tv_sec * 1000).convert<Long>() + (spec.tv_nsec / 1000000)
 }
-
-// The Darwin kernel does not support per-core affinity like Linux, so we emulate
-// core mappings through thread affinity tags
-//@OptIn(ExperimentalForeignApi::class)
-//internal actual fun setThreadAffinity(logicalCore: Int) = memScoped {
-//    val handle = pthread_mach_thread_np(pthread_self())
-//    val policy = alloc<thread_affinity_policy_data_t> {
-//        affinity_tag = logicalCore
-//    }
-//    val result = thread_policy_set( // @formatter:off
-//        thread = handle,
-//        flavor = THREAD_AFFINITY_POLICY.toUInt(),
-//        policy_info = policy.ptr.reinterpret(),
-//        policy_infoCnt = THREAD_AFFINITY_POLICY_COUNT
-//    ) // @formatter:on
-//    check(result == KERN_SUCCESS) { "Could not update thread affinity tag" }
-//}
-//
-//@OptIn(ExperimentalForeignApi::class)
-//internal actual fun getThreadAffinity(): Int = memScoped {
-//    val handle = pthread_mach_thread_np(pthread_self())
-//    val policy = alloc<thread_affinity_policy_data_t>()
-//    thread_policy_get(
-//        thread = handle,
-//        flavor = THREAD_AFFINITY_POLICY.toUInt(),
-//        policy_info = policy.ptr.reinterpret(),
-//        policy_infoCnt = null,
-//        get_default = null
-//    )
-//    return policy.affinity_tag
-//}

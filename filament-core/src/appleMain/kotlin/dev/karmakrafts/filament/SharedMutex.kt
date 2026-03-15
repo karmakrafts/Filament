@@ -20,10 +20,8 @@ package dev.karmakrafts.filament
 
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.alloc
-import kotlinx.cinterop.free
 import kotlinx.cinterop.nativeHeap
 import kotlinx.cinterop.ptr
-import platform.posix.pthread_rwlock_destroy
 import platform.posix.pthread_rwlock_init
 import platform.posix.pthread_rwlock_rdlock
 import platform.posix.pthread_rwlock_t
@@ -33,42 +31,49 @@ import platform.posix.pthread_rwlock_unlock
 import platform.posix.pthread_rwlock_wrlock
 
 private class AppleSharedMutex(
-    val handle: NativeSharedMutexHandle
+    val handle: BoxedSharedMutexHandle
 ) : SharedMutex {
     override val writeLockable: Lockable
         get() = WriteLockable(this)
 
     override fun lockWrite() {
+        val handle = handle.value
+        check(handle is AppleSharedMutexHandle) { "Handle is not an AppleSharedMutexHandle" }
         pthread_rwlock_wrlock(handle.value.ptr)
     }
 
     override fun tryLockWrite(): Boolean {
+        val handle = handle.value
+        check(handle is AppleSharedMutexHandle) { "Handle is not an AppleSharedMutexHandle" }
         return pthread_rwlock_trywrlock(handle.value.ptr) == 1
     }
 
     override fun unlockWrite() {
+        val handle = handle.value
+        check(handle is AppleSharedMutexHandle) { "Handle is not an AppleSharedMutexHandle" }
         pthread_rwlock_unlock(handle.value.ptr)
     }
 
     override fun lock() {
+        val handle = handle.value
+        check(handle is AppleSharedMutexHandle) { "Handle is not an AppleSharedMutexHandle" }
         pthread_rwlock_rdlock(handle.value.ptr)
     }
 
     override fun tryLock(): Boolean {
+        val handle = handle.value
+        check(handle is AppleSharedMutexHandle) { "Handle is not an AppleSharedMutexHandle" }
         return pthread_rwlock_tryrdlock(handle.value.ptr) == 1
     }
 
     override fun unlock() {
+        val handle = handle.value
+        check(handle is AppleSharedMutexHandle) { "Handle is not an AppleSharedMutexHandle" }
         pthread_rwlock_unlock(handle.value.ptr)
     }
 }
 
-actual fun SharedMutex(): SharedMutex = AppleSharedMutex(NativeSharedMutexHandle(nativeHeap.alloc<pthread_rwlock_t> {
-    pthread_rwlock_init(ptr, null)
-}))
-
-@OptIn(ExperimentalForeignApi::class)
-internal actual fun destroySharedMutex(handle: pthread_rwlock_t) {
-    pthread_rwlock_destroy(handle.ptr)
-    nativeHeap.free(handle)
-}
+actual fun SharedMutex(): SharedMutex =
+    AppleSharedMutex(BoxedSharedMutexHandle(AppleSharedMutexHandle(nativeHeap.alloc<pthread_rwlock_t> {
+        pthread_rwlock_init(ptr, null)
+    })))

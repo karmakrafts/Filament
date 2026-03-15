@@ -14,81 +14,70 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalForeignApi::class)
+
 package dev.karmakrafts.filament
 
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.alloc
-import kotlinx.cinterop.memScoped
+import kotlinx.cinterop.nativeHeap
 import kotlinx.cinterop.ptr
-import kotlinx.cinterop.value
-import platform.posix.pthread_rwlock_destroy
-import platform.posix.pthread_rwlock_init
-import platform.posix.pthread_rwlock_rdlock
-import platform.posix.pthread_rwlock_t
-import platform.posix.pthread_rwlock_tVar
-import platform.posix.pthread_rwlock_tryrdlock
-import platform.posix.pthread_rwlock_trywrlock
-import platform.posix.pthread_rwlock_unlock
-import platform.posix.pthread_rwlock_wrlock
+import platform.windows.AcquireSRWLockExclusive
+import platform.windows.AcquireSRWLockShared
+import platform.windows.InitializeSRWLock
+import platform.windows.ReleaseSRWLockExclusive
+import platform.windows.ReleaseSRWLockShared
+import platform.windows.SRWLOCK
+import platform.windows.TRUE
+import platform.windows.TryAcquireSRWLockExclusive
+import platform.windows.TryAcquireSRWLockShared
 
-@ExperimentalForeignApi
-internal actual fun createSharedMutex(): SharedMutexHandle = memScoped {
-    val handle = alloc<pthread_rwlock_tVar>()
-    pthread_rwlock_init(handle.ptr, null)
-    NativeSharedMutexHandle(handle.value)
+private class WindowsSharedMutex(
+    val handle: BoxedSharedMutexHandle
+) : SharedMutex {
+    override val writeLockable: Lockable
+        get() = WriteLockable(this)
+
+    override fun lockWrite() {
+        val handle = handle.value
+        check(handle is WindowsSharedMutexHandle) { "Handle is not a WindowsSharedMutexHandle" }
+        AcquireSRWLockExclusive(handle.value.ptr)
+    }
+
+    override fun tryLockWrite(): Boolean {
+        val handle = handle.value
+        check(handle is WindowsSharedMutexHandle) { "Handle is not a WindowsSharedMutexHandle" }
+        return TryAcquireSRWLockExclusive(handle.value.ptr) == TRUE.toUByte()
+    }
+
+    override fun unlockWrite() {
+        val handle = handle.value
+        check(handle is WindowsSharedMutexHandle) { "Handle is not a WindowsSharedMutexHandle" }
+        ReleaseSRWLockExclusive(handle.value.ptr)
+    }
+
+    override fun lock() {
+        val handle = handle.value
+        check(handle is WindowsSharedMutexHandle) { "Handle is not a WindowsSharedMutexHandle" }
+        AcquireSRWLockShared(handle.value.ptr)
+    }
+
+    override fun tryLock(): Boolean {
+        val handle = handle.value
+        check(handle is WindowsSharedMutexHandle) { "Handle is not a WindowsSharedMutexHandle" }
+        return TryAcquireSRWLockShared(handle.value.ptr) == TRUE.toUByte()
+    }
+
+    override fun unlock() {
+        val handle = handle.value
+        check(handle is WindowsSharedMutexHandle) { "Handle is not a WindowsSharedMutexHandle" }
+        ReleaseSRWLockShared(handle.value.ptr)
+    }
 }
 
-@ExperimentalForeignApi
-internal actual fun lockSharedMutex(handle: SharedMutexHandle): Unit = memScoped {
-    require(handle is NativeSharedMutexHandle)
-    pthread_rwlock_rdlock(alloc<pthread_rwlock_tVar> {
-        value = handle.value
-    }.ptr)
-}
-
-@ExperimentalForeignApi
-internal actual fun tryLockSharedMutex(handle: SharedMutexHandle): Boolean = memScoped {
-    require(handle is NativeSharedMutexHandle)
-    return pthread_rwlock_tryrdlock(alloc<pthread_rwlock_tVar> {
-        value = handle.value
-    }.ptr) == 1
-}
-
-@ExperimentalForeignApi
-internal actual fun unlockSharedMutex(handle: SharedMutexHandle): Unit = memScoped {
-    require(handle is NativeSharedMutexHandle)
-    pthread_rwlock_unlock(alloc<pthread_rwlock_tVar> {
-        value = handle.value
-    }.ptr)
-}
-
-@ExperimentalForeignApi
-internal actual fun lockWriteSharedMutex(handle: SharedMutexHandle): Unit = memScoped {
-    require(handle is NativeSharedMutexHandle)
-    pthread_rwlock_wrlock(alloc<pthread_rwlock_tVar> {
-        value = handle.value
-    }.ptr)
-}
-
-@ExperimentalForeignApi
-internal actual fun tryLockWriteSharedMutex(handle: SharedMutexHandle): Boolean = memScoped {
-    require(handle is NativeSharedMutexHandle)
-    pthread_rwlock_trywrlock(alloc<pthread_rwlock_tVar> {
-        value = handle.value
-    }.ptr) == 1
-}
-
-@ExperimentalForeignApi
-internal actual fun unlockWriteSharedMutex(handle: SharedMutexHandle): Unit = memScoped {
-    require(handle is NativeSharedMutexHandle)
-    pthread_rwlock_unlock(alloc<pthread_rwlock_tVar> {
-        value = handle.value
-    }.ptr)
-}
-
-@ExperimentalForeignApi
-internal actual fun destroySharedMutex(handle: pthread_rwlock_t): Unit = memScoped {
-    pthread_rwlock_destroy(alloc<pthread_rwlock_tVar> {
-        value = handle
-    }.ptr)
+actual fun SharedMutex(): SharedMutex {
+    val handle = nativeHeap.alloc<SRWLOCK> {
+        InitializeSRWLock(ptr)
+    }
+    return WindowsSharedMutex(BoxedSharedMutexHandle(WindowsSharedMutexHandle(handle)))
 }

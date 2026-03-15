@@ -18,36 +18,34 @@
 
 package dev.karmakrafts.filament
 
-import platform.posix.pthread_mutex_t
-import platform.posix.pthread_rwlock_t
 import kotlin.experimental.ExperimentalNativeApi
 import kotlin.native.ref.Cleaner
 import kotlin.native.ref.createCleaner
 
-internal expect fun destroyMutex(handle: pthread_mutex_t)
+internal interface MutexHandle : AutoCloseable
 
-internal expect fun destroySharedMutex(handle: pthread_rwlock_t)
+internal interface SharedMutexHandle : AutoCloseable
 
-internal class NativeMutexHandle(
-    value: pthread_mutex_t
+internal class BoxedMutexHandle(
+    value: MutexHandle
 ) {
-    private val _value: GCBox<pthread_mutex_t> = GCBox(value, ::destroyMutex)
+    private val _value: GCBox<MutexHandle> = GCBox(value)
 
     @Suppress("UNUSED")
-    private val cleaner: Cleaner = createCleaner(_value, GCBox<pthread_mutex_t>::drop)
+    private val cleaner: Cleaner = createCleaner(_value, GCBox<MutexHandle>::drop)
 
-    val value: pthread_mutex_t
+    val value: MutexHandle
         get() = _value.value
 }
 
-internal class NativeSharedMutexHandle(
-    value: pthread_rwlock_t
+internal class BoxedSharedMutexHandle(
+    value: SharedMutexHandle
 ) {
-    private val _value: GCBox<pthread_rwlock_t> = GCBox(value, ::destroySharedMutex)
+    private val _value: GCBox<SharedMutexHandle> = GCBox(value)
 
     @Suppress("UNUSED")
-    private val cleaner: Cleaner = createCleaner(_value, GCBox<pthread_rwlock_t>::drop)
+    private val cleaner: Cleaner = createCleaner(_value, GCBox<SharedMutexHandle>::drop)
 
-    val value: pthread_rwlock_t
+    val value: SharedMutexHandle
         get() = _value.value
 }

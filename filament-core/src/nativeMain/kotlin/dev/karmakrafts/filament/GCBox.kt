@@ -26,9 +26,8 @@ import kotlin.concurrent.atomics.AtomicBoolean
 import kotlin.experimental.ExperimentalNativeApi
 import kotlin.native.ref.WeakReference
 
-internal data class GCBox<T>( // @formatter:off
-    val value: T,
-    private val dropAction: (T) -> Unit
+internal data class GCBox<T : AutoCloseable>( // @formatter:off
+    val value: T
 ) { // @formatter:on
     companion object {
         private val boxes: ConcurrentMutableList<WeakReference<GCBox<*>>> = ConcurrentMutableList()
@@ -62,6 +61,6 @@ internal data class GCBox<T>( // @formatter:off
 
     fun drop() {
         if (!isDropped.compareAndSet(expectedValue = false, newValue = true)) return
-        dropAction(value)
+        value.close()
     }
 }

@@ -24,7 +24,7 @@ import kotlin.time.Duration.Companion.nanoseconds
 import kotlin.time.DurationUnit
 import java.lang.Thread as JavaThread
 
-private val internalThreadId: AtomicInt = AtomicInt(1)
+private val internalThreadId: AtomicInt = AtomicInt(1) // Skip 0 since that's always main
 
 internal val threadAffinity: ThreadLocal<Int> = ThreadLocal.withInitial { Thread.NO_AFFINITY }
 

@@ -14,55 +14,43 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalForeignApi::class)
+
 package dev.karmakrafts.filament
 
 import kotlinx.cinterop.ExperimentalForeignApi
-import kotlinx.cinterop.alloc
-import kotlinx.cinterop.memScoped
-import kotlinx.cinterop.ptr
-import kotlinx.cinterop.value
-import platform.posix.pthread_mutex_destroy
-import platform.posix.pthread_mutex_init
-import platform.posix.pthread_mutex_lock
-import platform.posix.pthread_mutex_t
-import platform.posix.pthread_mutex_tVar
-import platform.posix.pthread_mutex_trylock
-import platform.posix.pthread_mutex_unlock
+import platform.windows.CreateMutexW
+import platform.windows.FALSE
+import platform.windows.INFINITE
+import platform.windows.ReleaseMutex
+import platform.windows.WAIT_OBJECT_0
+import platform.windows.WaitForSingleObject
 
-@ExperimentalForeignApi
-internal actual fun createMutex(): MutexHandle = memScoped {
-    val buffer = alloc<pthread_mutex_tVar>()
-    pthread_mutex_init(buffer.ptr, null)
-    NativeMutexHandle(buffer.value)
+private class WindowsMutex(
+    val handle: BoxedMutexHandle
+) : Mutex {
+    override fun lock() {
+        val handle = handle.value
+        check(handle is WindowsMutexHandle) { "Handle is not a WindowsMutexHandle" }
+        WaitForSingleObject(handle.value, INFINITE)
+    }
+
+    override fun tryLock(): Boolean {
+        val handle = handle.value
+        check(handle is WindowsMutexHandle) { "Handle is not a WindowsMutexHandle" }
+        return WaitForSingleObject(handle.value, 0U) == WAIT_OBJECT_0
+    }
+
+    override fun unlock() {
+        val handle = handle.value
+        check(handle is WindowsMutexHandle) { "Handle is not a WindowsMutexHandle" }
+        ReleaseMutex(handle.value)
+    }
 }
 
-@ExperimentalForeignApi
-internal actual fun destroyMutex(handle: pthread_mutex_t): Unit = memScoped {
-    pthread_mutex_destroy(alloc<pthread_mutex_tVar> {
-        value = handle
-    }.ptr)
-}
-
-@ExperimentalForeignApi
-internal actual fun lockMutex(handle: MutexHandle): Unit = memScoped {
-    require(handle is NativeMutexHandle)
-    pthread_mutex_lock(alloc<pthread_mutex_tVar> {
-        value = handle.value
-    }.ptr)
-}
-
-@ExperimentalForeignApi
-internal actual fun tryLockMutex(handle: MutexHandle): Boolean = memScoped {
-    require(handle is NativeMutexHandle)
-    pthread_mutex_trylock(alloc<pthread_mutex_tVar> {
-        value = handle.value
-    }.ptr) == 1
-}
-
-@ExperimentalForeignApi
-internal actual fun unlockMutex(handle: MutexHandle): Unit = memScoped {
-    require(handle is NativeMutexHandle)
-    pthread_mutex_unlock(alloc<pthread_mutex_tVar> {
-        value = handle.value
-    }.ptr)
+actual fun Mutex(): Mutex {
+    val handle = checkNotNull(CreateMutexW(null, FALSE, null)) {
+        "Could not create mutex"
+    }
+    return WindowsMutex(BoxedMutexHandle(WindowsMutexHandle(handle)))
 }

@@ -18,35 +18,34 @@
 
 package dev.karmakrafts.filament
 
-import co.touchlab.stately.collections.ConcurrentMutableSet
-import kotlinx.cinterop.ByteVar
-import kotlinx.cinterop.COpaquePointer
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.StableRef
 import kotlinx.cinterop.alloc
-import kotlinx.cinterop.allocArray
 import kotlinx.cinterop.asStableRef
+import kotlinx.cinterop.cValue
+import kotlinx.cinterop.convert
 import kotlinx.cinterop.memScoped
-import kotlinx.cinterop.pointed
 import kotlinx.cinterop.ptr
-import kotlinx.cinterop.reinterpret
-import kotlinx.cinterop.toKString
-import platform.posix.nanosleep
-import platform.posix.pthread_getname_np
-import platform.posix.pthread_self
-import platform.posix.pthread_setname_np
-import platform.posix.pthread_t
-import platform.posix.timespec
+import kotlinx.cinterop.staticCFunction
+import platform.windows.CloseHandle
+import platform.windows.CreateThread
+import platform.windows.DWORD
+import platform.windows.DWORDVar
 import platform.windows.GetCurrentThread
+import platform.windows.GetCurrentThreadId
+import platform.windows.GetLastError
+import platform.windows.GetMaximumProcessorCount
 import platform.windows.HANDLE
+import platform.windows.INFINITE
+import platform.windows.LPVOID
+import platform.windows.SetThreadGroupAffinity
+import platform.windows.Sleep
+import platform.windows.WaitForSingleObject
+import kotlin.concurrent.atomics.AtomicBoolean
 import kotlin.native.concurrent.ThreadLocal
 
-private val detachedThreads: ConcurrentMutableSet<pthread_t> = ConcurrentMutableSet()
-
 @ThreadLocal
-private var previousThreadGroup: UShort = 0U
-
-@ThreadLocal
-private var previousThreadAffinity: ULong = 0UL
+private var threadName: String? = null
 
 @ThreadLocal
 private var threadAffinity: Int = Thread.NO_AFFINITY
@@ -59,80 +58,48 @@ private class WindowsThread( // @formatter:off
     val handle: HANDLE,
     override val affinity: Int
 ) : Thread { // @formatter:on
+    private val _isAlive: AtomicBoolean = AtomicBoolean(true)
     override val isAlive: Boolean
-        get() = TODO("Not yet implemented")
+        get() = _isAlive.load()
+
+    private val _isDetached: AtomicBoolean = AtomicBoolean(false)
     override val isDetached: Boolean
-        get() = TODO("Not yet implemented")
+        get() = _isDetached.load()
 
     override fun join() {
-        TODO("Not yet implemented")
+        if (!_isAlive.compareAndExchange(expectedValue = true, newValue = false)) return
+        WaitForSingleObject(handle, INFINITE)
+        CloseHandle(handle) // TODO: check this
     }
 
     override fun detach() {
-        TODO("Not yet implemented")
+        if (_isDetached.compareAndExchange(expectedValue = false, newValue = true)) return
+        CloseHandle(handle)
     }
 }
 
-private fun threadTrampoline(userData: COpaquePointer?): COpaquePointer? {
+private fun threadTrampoline(userData: LPVOID?): DWORD {
     userData?.asStableRef<() -> Unit>()?.apply {
         get()()
         dispose()
     }
-    return null
+    return 0U
 }
-
-//@ExperimentalForeignApi
-//internal actual fun currentThread(): ThreadHandle {
-//    return NativeThreadHandle(pthread_self())
-//}
-//
-//@ExperimentalForeignApi
-//internal actual fun createThread(function: () -> Unit): ThreadHandle = memScoped {
-//    val handle = alloc<pthread_tVar>()
-//    pthread_create(handle.ptr, null, staticCFunction(::threadEntryPoint), StableRef.create(function).asCPointer())
-//    NativeThreadHandle(requireNotNull(handle.value) { "Could not create thread" })
-//}
-//
-//@ExperimentalForeignApi
-//internal actual fun joinThread(handle: ThreadHandle) {
-//    require(handle is NativeThreadHandle)
-//    pthread_join(handle.value, null)
-//}
-//
-//@ExperimentalForeignApi
-//internal actual fun detachThread(handle: ThreadHandle) {
-//    require(handle is NativeThreadHandle)
-//    pthread_detach(handle.value)
-//    detachedThreads += handle.value
-//}
 
 @PublishedApi
 internal actual fun setThreadName(name: String?) {
-    pthread_setname_np(pthread_self(), name)
+    threadName = name
 }
 
 @PublishedApi
-@ExperimentalForeignApi
-internal actual fun getThreadName(): String = memScoped {
-    val nameBuffer = allocArray<ByteVar>(4096).reinterpret<ByteVar>().pointed
-    pthread_getname_np(pthread_self(), nameBuffer.ptr, 4096U)
-    nameBuffer.ptr.toKString().ifBlank { "Thread ${pthread_self()}" }
-}
+internal actual fun getThreadName(): String = threadName ?: "Thread ${GetCurrentThreadId()}"
 
 @PublishedApi
-@ExperimentalForeignApi
-internal actual fun getThreadId(): ULong {
-    return pthread_self()
-}
+internal actual fun getThreadId(): ULong = GetCurrentThreadId().toULong()
 
-@ExperimentalForeignApi
-internal actual fun sleepThread(millis: Long): Long = memScoped {
-    val spec = alloc<timespec> {
-        tv_sec = millis / 1000
-        tv_nsec = (millis % 1000000).toInt()
-    }
-    nanosleep(spec.ptr, spec.ptr)
-    (spec.tv_sec * 1000) + (spec.tv_nsec / 1000000)
+internal actual fun sleepThread(millis: Long): Long {
+    Sleep(millis.toUInt())
+    return millis // TODO: actually measure passed time
 }
 
 actual fun Thread( // @formatter:off
@@ -140,75 +107,32 @@ actual fun Thread( // @formatter:off
     stackSize: Long,
     detached: Boolean,
     function: () -> Unit
-): Thread = TODO() // @formatter:on
-
-//@ExperimentalForeignApi
-//internal actual fun isThreadAlive(handle: ThreadHandle): Boolean = memScoped {
-//    require(handle is NativeThreadHandle)
-//    val result = alloc<COpaquePointerVar>()
-//    _pthread_tryjoin(handle.value, result.ptr) != 0
-//}
-//
-//internal actual fun isThreadDetached(handle: ThreadHandle): Boolean {
-//    require(handle is NativeThreadHandle)
-//    return handle.value in detachedThreads
-//}
-//
-//@OptIn(ExperimentalForeignApi::class)
-//internal actual fun setThreadAffinity(logicalCore: Int) = memScoped {
-//    val handle = GetCurrentThread() ?: return@memScoped
-//
-//    // If no affinity is specified, we reset the affinity state
-//    if (logicalCore == Thread.NO_AFFINITY) {
-//        check(SetThreadGroupAffinity(handle, cValue {
-//            Group = previousThreadGroup
-//            Mask = previousThreadAffinity
-//        }, null) != 0) { "Could not restore thread affinity" }
-//        previousThreadGroup = 0U
-//        previousThreadAffinity = 0UL
-//        return@memScoped
-//    }
-//
-//    // Calculate the thread group of the first specified core
-//    val groupCount = GetMaximumProcessorGroupCount()
-//    val coresPerGroup = GetMaximumProcessorCount(groupCount).toInt()
-//    val groupIndex = logicalCore / coresPerGroup
-//
-//    // Save the default affinity group and mask if it's not already saved
-//    if (previousThreadGroup == 0U.toUShort() && previousThreadAffinity == 0UL) {
-//        val affinity = alloc<GROUP_AFFINITY>()
-//        GetThreadGroupAffinity(handle, affinity.ptr)
-//        previousThreadGroup = affinity.Group
-//        previousThreadAffinity = affinity.Mask
-//    }
-//
-//    // Then update to the new custom configuration
-//    check(SetThreadGroupAffinity(handle, cValue {
-//        Group = groupIndex.toUShort()
-//        val coreGroupIndex = logicalCore / coresPerGroup
-//        check(coreGroupIndex == groupIndex) {
-//            "Logical core $logicalCore does not belong to thread group $groupIndex"
-//        }
-//        val coreIndexInGroup = logicalCore % coresPerGroup
-//        Mask = Mask or (1UL shl coreIndexInGroup)
-//    }, null) != 0) { "Could not set thread affinity" }
-//}
-//
-//@OptIn(ExperimentalForeignApi::class)
-//internal actual fun getThreadAffinity(): Int = memScoped {
-//    val handle = GetCurrentThread() ?: return -1
-//    val affinity = alloc<GROUP_AFFINITY>()
-//    GetThreadGroupAffinity(handle, affinity.ptr)
-//    val groupCount = GetMaximumProcessorGroupCount().toInt()
-//    var coreOffset = 0
-//    for (groupIndex in 0..<groupCount) {
-//        if (groupIndex != affinity.Group.toInt()) continue
-//        val coreCount = GetMaximumProcessorCount(groupIndex.toUShort()).toInt()
-//        for (coreIndex in 0..<coreCount) {
-//            if (affinity.Mask and (1UL shl coreIndex) == 0UL) continue
-//            return coreOffset + coreIndex
-//        }
-//        coreOffset += coreCount
-//    }
-//    return -1
-//}
+): Thread = memScoped { // @formatter:on
+    val actualStackSize = if (stackSize == Thread.DEFAULT_STACK_SIZE) 0 else stackSize
+    val trampolineAddress = staticCFunction(::threadTrampoline)
+    val functionAddress = StableRef.create(function).asCPointer()
+    val threadId = alloc<DWORDVar>()
+    val handle = checkNotNull(
+        CreateThread(
+            null, actualStackSize.convert(), trampolineAddress, functionAddress, 0U, threadId.ptr
+        )
+    ) {
+        "Could not create thread"
+    }
+    // TODO: this code is kind of naive as it assumes all NUMA groups have the same size, but this should be fine for now
+    if (affinity != Thread.NO_AFFINITY) {
+        val coresPerGroup = GetMaximumProcessorCount(0U.toUShort()).toInt()
+        check(affinity < coresPerGroup) { "Affinity must be less than thread group size" }
+        val groupIndex = affinity / coresPerGroup
+        val coreIndexInGroup = affinity % coresPerGroup
+        // Then update to the new custom configuration
+        check(SetThreadGroupAffinity(handle, cValue {
+            Group = groupIndex.toUShort()
+            Mask = Mask or (1UL shl coreIndexInGroup)
+        }, null) != 0) { "Could not set thread affinity: 0x${GetLastError().toHexString()}" }
+        threadAffinity = affinity
+    }
+    val thread = WindowsThread(handle, affinity)
+    if (detached) thread.detach()
+    return thread
+}
