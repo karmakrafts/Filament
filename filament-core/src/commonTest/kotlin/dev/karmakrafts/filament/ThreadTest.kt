@@ -56,7 +56,7 @@ class ThreadTest {
 
     @Test
     fun `Thread with result`() {
-        val result = ThreadWithResult {
+        val result = Thread<String> {
             "Hello, World!"
         }.awaitResult()
         assertEquals("Hello, World!", result)

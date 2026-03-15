@@ -57,7 +57,7 @@ private class ThreadWithResultImpl<R>( // @formatter:off
 }
 
 // TODO: document this
-fun <R> ThreadWithResult(
+fun <R> Thread(
     affinity: Int = Thread.NO_AFFINITY,
     stackSize: Long = Thread.DEFAULT_STACK_SIZE,
     detached: Boolean = false,
