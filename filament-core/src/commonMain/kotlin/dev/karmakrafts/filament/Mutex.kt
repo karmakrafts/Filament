@@ -30,7 +30,7 @@ package dev.karmakrafts.filament
  * Example usage:
  * ```
  * val mutex = Mutex()
- * mutex.guarded {
+ * mutex.withLock {
  *     // Critical section - only one thread can execute this at a time
  *     // Access or modify shared resources safely here
  * }
@@ -39,13 +39,13 @@ package dev.karmakrafts.filament
 interface Mutex : Lockable
 
 /**
- * Creates a new [Mutex] instance.
+ * Creates and starts a new [Mutex].
  *
  * This factory function instantiates a platform-specific implementation of the [Mutex] interface.
  * The created mutex is initially unlocked and ready to be used for thread synchronization.
  *
  * Example:
- * ```
+ * ```kotlin
  * val mutex = Mutex()
  *
  * // Use with explicit lock/unlock
@@ -56,12 +56,12 @@ interface Mutex : Lockable
  *     mutex.unlock()
  * }
  *
- * // Or use with the guarded extension function
- * mutex.guarded {
+ * // Or use with the withLock extension function
+ * mutex.withLock {
  *     // Critical section
  * }
  * ```
  *
- * @return A new [Mutex] instance
+ * @return A new [Mutex] instance.
  */
 expect fun Mutex(): Mutex

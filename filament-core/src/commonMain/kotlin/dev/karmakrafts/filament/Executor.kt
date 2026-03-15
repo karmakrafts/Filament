@@ -22,10 +22,12 @@ package dev.karmakrafts.filament
  */
 interface Executor : AutoCloseable {
     /**
-     * Submits a task for execution.
-     * The task will be executed at some point in the future, depending on the implementation.
+     * Submits a task for asynchronous execution.
      *
-     * @param task The function to be executed.
+     * The task will be queued and executed at some point in the future,
+     * depending on the specific [Executor] implementation.
+     *
+     * @param task The block of code to be executed.
      */
     fun enqueueTask(task: () -> Unit)
 }

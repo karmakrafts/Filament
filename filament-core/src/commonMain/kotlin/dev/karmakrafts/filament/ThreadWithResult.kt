@@ -16,9 +16,20 @@
 
 package dev.karmakrafts.filament
 
-// TODO: document this
+/**
+ * Represents a [Thread] that returns a result after its execution has completed.
+ *
+ * @param R The type of the result returned by the thread.
+ */
 interface ThreadWithResult<R> : Thread {
-    // TODO: document this
+    /**
+     * Blocks the current thread until this thread has completed and returns its result.
+     *
+     * This method internally calls [join] to ensure the thread has finished before
+     * retrieving the result.
+     *
+     * @return The result produced by the thread's execution.
+     */
     fun awaitResult(): R
 }
 
@@ -56,7 +67,16 @@ private class ThreadWithResultImpl<R>( // @formatter:off
     }
 }
 
-// TODO: document this
+/**
+ * Creates and starts a new [ThreadWithResult].
+ *
+ * @param R The type of the result returned by the thread.
+ * @param affinity The CPU affinity for the new thread. Defaults to [Thread.NO_AFFINITY].
+ * @param stackSize The stack size for the new thread in bytes. Defaults to [Thread.DEFAULT_STACK_SIZE].
+ * @param detached Whether the thread should be created in a detached state. Defaults to `false`.
+ * @param function The block of code to be executed by the thread, which returns a result.
+ * @return A new [ThreadWithResult] instance.
+ */
 fun <R> Thread(
     affinity: Int = Thread.NO_AFFINITY,
     stackSize: Long = Thread.DEFAULT_STACK_SIZE,

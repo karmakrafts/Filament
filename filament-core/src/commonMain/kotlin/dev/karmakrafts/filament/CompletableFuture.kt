@@ -71,11 +71,12 @@ class CompletableFuture<T>( // @formatter:off
 
     /**
      * Registers a callback to be invoked when this future completes.
+     *
      * If the future is already completed, the callback will be invoked immediately.
      * Multiple callbacks can be registered; they will be invoked in the order they were registered.
      *
      * @param callback The function to invoke when the future completes.
-     * @return This future, for method chaining.
+     * @return This future instance to allow for method chaining.
      */
     fun onCompletion(callback: CompletionCallback<T>): Future<T> {
         val currentCallback = _completionCallback.load()

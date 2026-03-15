@@ -41,10 +41,14 @@ internal expect fun yieldThread()
  */
 interface Thread {
     companion object {
-        // TODO: document this
+        /**
+         * Constant representing no CPU affinity.
+         */
         const val NO_AFFINITY: Int = -1
 
-        // TODO: document this
+        /**
+         * Constant representing the default stack size for new threads.
+         */
         const val DEFAULT_STACK_SIZE: Long = -1L
 
         /**
@@ -93,7 +97,9 @@ interface Thread {
         fun sleep(duration: Duration): Duration = sleep(duration.inWholeMilliseconds).milliseconds
     }
 
-    // TODO: document this
+    /**
+     * The CPU affinity of this thread, or [NO_AFFINITY] if none is set.
+     */
     val affinity: Int
 
     /**
@@ -120,7 +126,15 @@ interface Thread {
     fun detach()
 }
 
-// TODO: document this
+/**
+ * Creates and starts a new [Thread].
+ *
+ * @param affinity The CPU affinity for the new thread. Defaults to [Thread.NO_AFFINITY].
+ * @param stackSize The stack size for the new thread in bytes. Defaults to [Thread.DEFAULT_STACK_SIZE].
+ * @param detached Whether the thread should be created in a detached state. Defaults to `false`.
+ * @param function The block of code to be executed by the thread.
+ * @return A new [Thread] instance.
+ */
 expect fun Thread(
     affinity: Int = Thread.NO_AFFINITY,
     stackSize: Long = Thread.DEFAULT_STACK_SIZE,

@@ -43,11 +43,12 @@ interface Future<T> {
 
     /**
      * Blocks the current thread until the future completes and returns the result.
-     * This method will yield the current thread's execution time to other threads
-     * while waiting for the result.
+     *
+     * This method will busy-wait for the result by yielding the current thread's
+     * execution time to other threads while waiting.
      *
      * @return The value that the future completed with.
-     * @throws IllegalStateException If the future completed but the value is null.
+     * @throws IllegalStateException If the future completed but the value is still null.
      */
     fun await(): T {
         while (!isCompleted) Thread.yield()

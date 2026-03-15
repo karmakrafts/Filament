@@ -16,6 +16,14 @@
 
 package dev.karmakrafts.filament
 
+/**
+ * An implementation of [Lockable] that delegates to the write lock of a [SharedMutex].
+ *
+ * This class allows using the write lock of a [SharedMutex] in contexts where a [Lockable]
+ * is required, such as in the [withLock] extension function.
+ *
+ * @property mutex The [SharedMutex] whose write lock this [Lockable] delegates to.
+ */
 @PublishedApi
 internal class WriteLockable(
     private val mutex: SharedMutex
@@ -31,11 +39,14 @@ internal class WriteLockable(
  * A reader-writer lock that allows multiple concurrent readers but exclusive writers.
  *
  * SharedMutex extends [Lockable] to provide two types of locks:
- * - Read locks (via [Lockable] methods): Multiple threads can hold read locks simultaneously
- * - Write locks (via write-specific methods): Only one thread can hold a write lock, and no read locks can be held simultaneously
+ * - **Read locks** (via [Lockable] methods): Multiple threads can hold read locks simultaneously,
+ *   as long as no write lock is held.
+ * - **Write locks** (via [lockWrite], [tryLockWrite], and [unlockWrite]): Only one thread can hold
+ *   a write lock at any given time. No read locks can be held while a write lock is active.
  *
- * This is useful for scenarios where reads are more frequent than writes, allowing for better concurrency
- * than a standard mutex when multiple readers are active.
+ * This primitive is useful for scenarios where data is read frequently but modified
+ * infrequently, as it allows for better concurrency than a standard [Mutex] when multiple
+ * readers are active.
  */
 interface SharedMutex : Lockable {
     /**
@@ -77,22 +88,22 @@ interface SharedMutex : Lockable {
  * executing the closure and guarantees that the lock will be released even if an exception occurs
  * during execution.
  *
- * Unlike [Lockable.withLock] which uses the read lock, this function uses the write lock,
+ * Unlike [withLock] which uses the read lock, this function uses the write lock,
  * providing exclusive access with no concurrent readers or writers.
  *
  * Example usage:
- * ```
+ * ```kotlin
  * val sharedMutex = SharedMutex()
- * val result = sharedMutex.guardedWrite {
+ * val result = sharedMutex.withWriteLock {
  *     // Critical section - exclusive access, no other readers or writers
  *     // Modify shared resources safely here
  *     computeResult()
  * }
  * ```
  *
- * @param R The return type of the closure
- * @param closure The code block to execute while holding the write lock
- * @return The result of the [closure] execution
+ * @param R The return type of the closure.
+ * @param closure The code block to execute while holding the write lock.
+ * @return The result of the [closure] execution.
  */
 inline fun <reified R> SharedMutex.withWriteLock(closure: () -> R): R {
     try {
@@ -116,9 +127,9 @@ inline fun <reified R> SharedMutex.withWriteLock(closure: () -> R): R {
  * the write lock is immediately available.
  *
  * Example usage:
- * ```
+ * ```kotlin
  * val sharedMutex = SharedMutex()
- * val result = sharedMutex.tryGuardedWrite(defaultResult) {
+ * val result = sharedMutex.tryWithWriteLock(defaultResult) {
  *     // This code only executes if the write lock was successfully acquired
  *     // Otherwise, defaultResult is returned without executing this block
  *     modifySharedData()
@@ -126,10 +137,10 @@ inline fun <reified R> SharedMutex.withWriteLock(closure: () -> R): R {
  * }
  * ```
  *
- * @param R The return type of the closure and the default value
- * @param defaultValue The value to return if the write lock cannot be acquired
- * @param closure The code block to execute if the write lock is successfully acquired
- * @return The result of the [closure] execution if the write lock was acquired, or [defaultValue] otherwise
+ * @param R The return type of the closure and the default value.
+ * @param defaultValue The value to return if the write lock cannot be acquired.
+ * @param closure The code block to execute if the write lock is successfully acquired.
+ * @return The result of the [closure] execution if the write lock was acquired, or [defaultValue] otherwise.
  */
 inline fun <reified R> SharedMutex.tryWithWriteLock(defaultValue: R, closure: () -> R): R {
     if (!tryLockWrite()) return defaultValue

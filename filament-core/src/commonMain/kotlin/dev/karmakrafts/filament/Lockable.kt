@@ -62,18 +62,18 @@ interface Lockable {
  * and guarantees that the lock will be released even if an exception occurs during execution.
  *
  * Example usage:
- * ```
+ * ```kotlin
  * val lockable = Mutex()
- * val result = lockable.guarded {
+ * val result = lockable.withLock {
  *     // Critical section - only one thread can execute this at a time
  *     // Access or modify shared resources safely here
  *     computeResult()
  * }
  * ```
  *
- * @param R The return type of the closure
- * @param closure The code block to execute while holding the lock
- * @return The result of the [closure] execution
+ * @param R The return type of the closure.
+ * @param closure The code block to execute while holding the lock.
+ * @return The result of the [closure] execution.
  */
 inline fun <reified R> Lockable.withLock(closure: () -> R): R {
     return try {
@@ -97,19 +97,19 @@ inline fun <reified R> Lockable.withLock(closure: () -> R): R {
  * the lock is immediately available.
  *
  * Example usage:
- * ```
+ * ```kotlin
  * val lockable = Mutex()
- * val result = lockable.tryGuarded(defaultResult) {
+ * val result = lockable.tryWithLock(defaultResult) {
  *     // This code only executes if the lock was successfully acquired
  *     // Otherwise, defaultResult is returned without executing this block
  *     computeResult()
  * }
  * ```
  *
- * @param R The return type of the closure and the default value
- * @param defaultValue The value to return if the lock cannot be acquired
- * @param closure The code block to execute if the lock is successfully acquired
- * @return The result of the [closure] execution if the lock was acquired, or [defaultValue] otherwise
+ * @param R The return type of the closure and the default value.
+ * @param defaultValue The value to return if the lock cannot be acquired.
+ * @param closure The code block to execute if the lock is successfully acquired.
+ * @return The result of the [closure] execution if the lock was acquired, or [defaultValue] otherwise.
  */
 inline fun <reified R> Lockable.tryWithLock(defaultValue: R, closure: () -> R): R {
     if (!tryLock()) return defaultValue

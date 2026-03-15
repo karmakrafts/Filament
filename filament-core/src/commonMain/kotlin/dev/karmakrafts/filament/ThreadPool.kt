@@ -31,14 +31,17 @@ import kotlin.concurrent.atomics.incrementAndFetch
 typealias ThreadFactory = (block: () -> Unit, index: Int) -> Thread
 
 /**
- * The default thread factory implementation that creates basic threads.
- * This factory ignores the index parameter and simply creates a thread with the given block.
+ * The default [ThreadFactory] implementation.
+ *
+ * This factory creates a new [Thread] for each task, ignoring the index parameter.
  */
 val defaultThreadFactory: ThreadFactory = { block, _ -> Thread(function = block) }
 
 /**
  * A pool of worker threads that can execute tasks concurrently.
- * ThreadPool implements the Executor interface for task submission and AutoCloseable for resource cleanup.
+ *
+ * [ThreadPool] implements the [Executor] interface for task submission and
+ * [AutoCloseable] for resource cleanup.
  *
  * @param threadFactory The factory used to create worker threads. Defaults to [defaultThreadFactory].
  * @param parallelism The number of worker threads in the pool. Defaults to 1.
