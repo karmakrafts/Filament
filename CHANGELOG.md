@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+## [2.0.0]
+
 ### Added
 
 - Convenience overload for `Thread.sleep` which accepts and returns a `Duration`
