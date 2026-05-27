@@ -1,5 +1,11 @@
 ## [Unreleased]
 
+### Changed
+
+- Updated Gradle to 9.5.1
+- Updated Karma Conventions to 1.16.4
+- Updated Android Gradle to 9.2.1
+
 ## [2.1.1]
 
 ### Changed
