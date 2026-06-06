@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+## [2.2.0]
+
 ### Changed
 
 - Downgraded to Gradle 9.4.1 because IDEA compatibility regression
