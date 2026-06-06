@@ -2,9 +2,12 @@
 
 ### Changed
 
-- Updated Gradle to 9.5.1
-- Updated Karma Conventions to 1.16.4
+- Downgraded to Gradle 9.4.1 because IDEA compatibility regression
+- Updated Kotlin to 2.4.0
+- Updated kotlinx.coroutines to 1.11.0
+- Updated Karma Conventions to 1.17.0
 - Updated Android Gradle to 9.2.1
+- Updated JNA to 5.19.0
 
 ## [2.1.1]
 
