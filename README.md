@@ -8,6 +8,10 @@
 [![](https://img.shields.io/badge/2.4.0-blue?logo=kotlin&label=kotlin)](https://kotlinlang.org/)
 [![](https://img.shields.io/badge/documentation-black?logo=kotlin)](https://docs.karmakrafts.dev/filament-core)
 
+![](https://img.shields.io/badge/-JVM-blue?logo=kotlin&labelColor=black)
+![](https://img.shields.io/badge/-Android-green?logo=kotlin&labelColor=black)
+![](https://img.shields.io/badge/-Native-lightgray?logo=kotlin&labelColor=black)
+
 Common `Thread` class (and snychronization primitives) for Kotlin/Multiplatform.
 This allows true, pure parallelism in Kotlin where controlling an OS thread directly is feasable.  
 The library also offers various utilities and integration with other libraries.
