@@ -101,9 +101,9 @@ security:
   before_script:
     - ./gradlew dependenciesForAll --write-locks --no-parallel > dependencies.txt
   script:
-    - trivy repo ./ --exit-code 0
-    - trivy repo ./ --exit-code 0 --format template --template "@/Library/Trivy/contrib/gitlab.tpl" --output report.json
-    - trivy repo ./ --exit-code 1 --severity CRITICAL
+    - trivy repo ./ --exit-code 0 --ignorefile .trivyignore.yaml
+    - trivy repo ./ --exit-code 0 --ignorefile .trivyignore.yaml --format template --template "@/Library/Trivy/contrib/gitlab.tpl" --output report.json
+    - trivy repo ./ --exit-code 1 --ignorefile .trivyignore.yaml --severity CRITICAL
   tags:
     - macos
 
@@ -161,17 +161,25 @@ test:windows:
 
 # ------------------------------ Publish
 
-publish:maven:
+publish:snapshot:maven:
   stage: publish
   rules:
     - *if-main
-    - *if-release
   script:
-    - ./gradlew publishAllPublicationsToGitLabRepository publishToSonatype closeAndReleaseStagingRepositories
+    - ./gradlew publishAllPublicationsToGitLabRepository publishAggregationToCentralSnapshots
   tags:
     - macos
 
-publish:documentation:
+publish:release:maven:
+  stage: publish
+  rules:
+    - *if-release
+  script:
+    - ./gradlew publishAllPublicationsToGitLabRepository publishAggregationToCentralPortal
+  tags:
+    - macos
+
+publish-documentation:
   stage: publish
   rules:
     - *if-release
