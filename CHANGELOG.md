@@ -1,5 +1,14 @@
 ## [Unreleased]
 
+### Changed
+
+- Updated to Gradle 9.8.1
+- Updated to Kotlin 2.4.21
+- Updated to AGP 9.4.1
+- Updated to Karma Conventions 1.21.1
+- Updated to JNA 5.19.1
+- Switched to NMCP publishing
+
 ## [2.2.0]
 
 ### Changed

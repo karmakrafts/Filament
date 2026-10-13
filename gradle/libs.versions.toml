@@ -1,15 +1,14 @@
 [versions]
 
 java = "21"
-filament = "2.2.0"
-kotlin = "2.4.0" # https://github.com/JetBrains/kotlin/releases
+filament = "2.3.0"
+kotlin = "2.4.21" # https://github.com/JetBrains/kotlin/releases
 kotlinxCoroutines = "1.11.0" # https://github.com/Kotlin/kotlinx.coroutines/releases
-androidGradle = "9.2.1" # https://developer.android.com/reference/tools/gradle-api
+androidGradle = "9.4.1" # https://developer.android.com/reference/tools/gradle-api
 dokka = "2.2.0" # https://github.com/Kotlin/dokka/releases
-karmaConventions = "1.17.0" # https://github.com/karmakrafts/karma-conventions/tags
+karmaConventions = "1.21.1" # https://github.com/karmakrafts/karma-conventions/tags
 stately = "2.1.0" # https://github.com/touchlab/Stately/releases
-gradleNexus = "2.0.0" # https://github.com/gradle-nexus/publish-plugin/releases
-jna = "5.19.0" # https://github.com/java-native-access/jna/tags
+jna = "5.19.1" # https://github.com/java-native-access/jna/tags
 
 [libraries]
 
@@ -24,5 +23,4 @@ jna-platform = { module = "net.java.dev.jna:jna-platform", version.ref = "jna" }
 android-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "androidGradle" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
-gradleNexus = { id = "io.github.gradle-nexus.publish-plugin", version.ref = "gradleNexus" }
 karmaConventions = { id = "dev.karmakrafts.conventions.karma-conventions", version.ref = "karmaConventions" }
