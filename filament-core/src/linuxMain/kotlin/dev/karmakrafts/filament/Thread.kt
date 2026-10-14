@@ -51,6 +51,7 @@ import platform.posix.sysconf
 import platform.posix.timespec
 import kotlin.concurrent.atomics.AtomicBoolean
 import kotlin.native.concurrent.ThreadLocal
+import kotlin.time.TimeSource
 
 @ThreadLocal
 internal var threadName: String? = null
@@ -109,10 +110,11 @@ internal actual fun getThreadId(): ULong {
 internal actual fun sleepThread(millis: Long): Long = memScoped {
     val spec = alloc<timespec> {
         tv_sec = millis / 1000
-        tv_nsec = millis % 1000000
+        tv_nsec = (millis % 1000) * 1000000
     }
-    nanosleep(spec.ptr, spec.ptr)
-    (spec.tv_sec * 1000) + (spec.tv_nsec / 1000000)
+    val start = TimeSource.Monotonic.markNow()
+    nanosleep(spec.ptr, null)
+    start.elapsedNow().inWholeMilliseconds
 }
 
 actual fun Thread( // @formatter:off
@@ -136,7 +138,10 @@ actual fun Thread( // @formatter:off
         "Could not set thread detach state"
     }
     val trampolineAddress = staticCFunction(::threadTrampoline)
-    val closureAddress = StableRef.create(function).asCPointer()
+    val closureAddress = StableRef.create {
+        threadAffinity = affinity
+        function()
+    }.asCPointer()
     check(pthread_create(handle.ptr, attributes.ptr, trampolineAddress, closureAddress) == 0) {
         "Could not create thread"
     }
@@ -147,6 +152,5 @@ actual fun Thread( // @formatter:off
             LibPthread.CPU_SET(affinity, ptr)
         })
     }
-    threadAffinity = affinity
     LinuxThread(handle.value, affinity)
 }

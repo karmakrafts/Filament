@@ -64,7 +64,10 @@ actual fun Thread( // @formatter:off
         "Could not set thread detach state"
     }
     val trampolineAddress = staticCFunction(::threadTrampoline)
-    val closureAddress = StableRef.create(function).asCPointer()
+    val closureAddress = StableRef.create {
+        threadAffinity = affinity
+        function()
+    }.asCPointer()
     check(pthread_create_suspended_np(handleAddress.ptr, attributes.ptr, trampolineAddress, closureAddress) == 0) {
         "Could not create thread"
     }
@@ -79,6 +82,5 @@ actual fun Thread( // @formatter:off
         thread_policy_set(kernelThread, THREAD_AFFINITY_POLICY.toUInt(), affinityPolicy.ptr.reinterpret(), 1U)
     }
     thread_resume(kernelThread)
-    threadAffinity = affinity
     AppleThread(handle, affinity)
 }

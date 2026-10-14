@@ -45,7 +45,7 @@ private class AppleSharedMutex(
     override fun tryLockWrite(): Boolean {
         val handle = handle.value
         check(handle is AppleSharedMutexHandle) { "Handle is not an AppleSharedMutexHandle" }
-        return pthread_rwlock_trywrlock(handle.value.ptr) == 1
+        return pthread_rwlock_trywrlock(handle.value.ptr) == 0
     }
 
     override fun unlockWrite() {
@@ -63,7 +63,7 @@ private class AppleSharedMutex(
     override fun tryLock(): Boolean {
         val handle = handle.value
         check(handle is AppleSharedMutexHandle) { "Handle is not an AppleSharedMutexHandle" }
-        return pthread_rwlock_tryrdlock(handle.value.ptr) == 1
+        return pthread_rwlock_tryrdlock(handle.value.ptr) == 0
     }
 
     override fun unlock() {

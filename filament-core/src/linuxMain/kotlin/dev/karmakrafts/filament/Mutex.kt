@@ -40,7 +40,7 @@ private class LinuxMutex(
     override fun tryLock(): Boolean {
         val handle = handle.value
         check(handle is LinuxMutexHandle) { "Handle is not a LinuxMutexHandle" }
-        return pthread_mutex_trylock(handle.value.ptr) == 1
+        return pthread_mutex_trylock(handle.value.ptr) == 0
     }
 
     override fun unlock() {

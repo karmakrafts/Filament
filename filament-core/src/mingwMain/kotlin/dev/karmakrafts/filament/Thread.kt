@@ -110,7 +110,10 @@ actual fun Thread( // @formatter:off
 ): Thread = memScoped { // @formatter:on
     val actualStackSize = if (stackSize == Thread.DEFAULT_STACK_SIZE) 0 else stackSize
     val trampolineAddress = staticCFunction(::threadTrampoline)
-    val functionAddress = StableRef.create(function).asCPointer()
+    val functionAddress = StableRef.create {
+        threadAffinity = affinity
+        function()
+    }.asCPointer()
     val threadId = alloc<DWORDVar>()
     val handle = checkNotNull(
         CreateThread(
@@ -130,7 +133,6 @@ actual fun Thread( // @formatter:off
             Group = groupIndex.toUShort()
             Mask = Mask or (1UL shl coreIndexInGroup)
         }, null) != 0) { "Could not set thread affinity: 0x${GetLastError().toHexString()}" }
-        threadAffinity = affinity
     }
     val thread = WindowsThread(handle, affinity)
     if (detached) thread.detach()

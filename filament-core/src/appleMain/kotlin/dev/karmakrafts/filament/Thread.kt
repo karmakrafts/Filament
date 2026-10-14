@@ -43,6 +43,7 @@ import platform.posix.pthread_threadid_np
 import platform.posix.timespec
 import kotlin.concurrent.atomics.AtomicBoolean
 import kotlin.native.concurrent.ThreadLocal
+import kotlin.time.TimeSource
 
 @ThreadLocal
 internal var threadAffinity: Int = Thread.NO_AFFINITY
@@ -104,8 +105,9 @@ internal actual fun getThreadId(): ULong = memScoped {
 internal actual fun sleepThread(millis: Long): Long = memScoped {
     val spec = alloc<timespec> {
         tv_sec = (millis / 1000).convert()
-        tv_nsec = (millis % 1000000).convert()
+        tv_nsec = ((millis % 1000) * 1000000).convert()
     }
-    nanosleep(spec.ptr, spec.ptr)
-    (spec.tv_sec * 1000).convert<Long>() + (spec.tv_nsec / 1000000)
+    val start = TimeSource.Monotonic.markNow()
+    nanosleep(spec.ptr, null)
+    start.elapsedNow().inWholeMilliseconds
 }

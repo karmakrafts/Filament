@@ -82,10 +82,12 @@ actual fun Thread( // @formatter:off
     function: () -> Unit
 ): Thread { // @formatter:on
     val actualStackSize = if (stackSize == Thread.DEFAULT_STACK_SIZE) 0 else stackSize
-    val handle = JavaThread(null, function, "Thread ${internalThreadId.fetchAndIncrement()}", actualStackSize)
+    val handle = JavaThread(null, {
+        threadAffinity.set(affinity)
+        function()
+    }, "Thread ${internalThreadId.fetchAndIncrement()}", actualStackSize)
     val thread = JvmThread(handle, affinity)
     if (detached) thread.detach()
     thread.handle.start()
-    threadAffinity.set(affinity)
     return thread
 }

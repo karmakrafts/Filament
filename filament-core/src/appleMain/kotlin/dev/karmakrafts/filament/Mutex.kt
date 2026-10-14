@@ -40,7 +40,7 @@ private value class AppleMutex(
     override fun tryLock(): Boolean {
         val handle = handle.value
         check(handle is AppleMutexHandle) { "Handle is not an AppleMutexHandle" }
-        return pthread_mutex_trylock(handle.value.ptr) == 1
+        return pthread_mutex_trylock(handle.value.ptr) == 0
     }
 
     override fun unlock() {

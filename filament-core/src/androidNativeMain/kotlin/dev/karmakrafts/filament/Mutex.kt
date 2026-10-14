@@ -40,7 +40,7 @@ private value class AndroidMutex(
     override fun tryLock(): Boolean {
         val handle = handle.value
         check(handle is AndroidMutexHandle) { "Mutex handle is not an AndroidMutexHandle" }
-        return pthread_mutex_trylock(handle.value.ptr) == 1
+        return pthread_mutex_trylock(handle.value.ptr) == 0
     }
 
     override fun unlock() {

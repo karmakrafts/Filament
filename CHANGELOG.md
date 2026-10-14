@@ -7,6 +7,11 @@
 ### Fixed
 
 - Flakey multithreaded dispatch test in `ExecutorDispatcherTest`
+- Broken return code comparison in some native `Mutex` and `SharedMutex` implementations
+
+### Changed
+
+- Improved test coverage accross public API
 
 ## [2.3.0]
 

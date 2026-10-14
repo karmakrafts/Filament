@@ -45,7 +45,7 @@ private value class AndroidSharedMutex(
     override fun tryLockWrite(): Boolean {
         val handle = handle.value
         check(handle is AndroidSharedMutexHandle) { "Handle is not an AndroidSharedMutexHandle" }
-        return pthread_rwlock_trywrlock(handle.value.ptr) == 1
+        return pthread_rwlock_trywrlock(handle.value.ptr) == 0
     }
 
     override fun unlockWrite() {
@@ -63,7 +63,7 @@ private value class AndroidSharedMutex(
     override fun tryLock(): Boolean {
         val handle = handle.value
         check(handle is AndroidSharedMutexHandle) { "Handle is not an AndroidSharedMutexHandle" }
-        return pthread_rwlock_tryrdlock(handle.value.ptr) == 1
+        return pthread_rwlock_tryrdlock(handle.value.ptr) == 0
     }
 
     override fun unlock() {
