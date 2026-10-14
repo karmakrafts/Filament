@@ -4,6 +4,10 @@
 
 - `Thread.spinLoopHint()` for more efficient spin loops compared to `Thread.yield()` if applicable
 
+### Fixed
+
+- Flakey multithreaded dispatch test in `ExecutorDispatcherTest`
+
 ## [2.3.0]
 
 ### Changed
