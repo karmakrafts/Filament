@@ -9,7 +9,6 @@ workflow:
 stages:
   - check_changelog
   - security
-  - build
   - test
   - publish
   - release
@@ -107,22 +106,9 @@ security:
   tags:
     - macos
 
-# ------------------------------ Build
-
-build:
-  stage: build
-  interruptible: true
-  rules:
-    - *if-merge-request
-    - *if-main
-  script:
-    - ./gradlew clean build
-  tags:
-    - macos
-
 # ------------------------------ Tests
 
-test:linux:
+test:linux:amd64:
   stage: test
   interruptible: true
   rules:
@@ -135,7 +121,20 @@ test:linux:
     - shell
     - amd64
 
-test:macos:
+test:linux:arm64:
+  stage: test
+  interruptible: true
+  rules:
+    - *if-merge-request
+    - *if-main
+  script:
+    - ./gradlew clean linuxArm64Test jvmTest --stacktrace
+  tags:
+    - linux
+    - docker
+    - arm64
+
+test:macos:arm64:
   stage: test
   interruptible: true
   rules:
@@ -147,7 +146,7 @@ test:macos:
     - macos
     - arm64
 
-test:windows:
+test:windows:amd64:
   stage: test
   interruptible: true
   rules:
