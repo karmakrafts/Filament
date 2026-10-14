@@ -130,8 +130,10 @@ test:linux:amd64:
 test:linux:arm64:
   stage: test
   interruptible: true
+  needs:
+    - test:linux:amd64
   dependencies:
-    - test:linux:amd64 # This provides our test binaries
+    - test:linux:amd64
   rules:
     - *if-merge-request
     - *if-main
