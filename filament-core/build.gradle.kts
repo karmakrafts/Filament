@@ -48,6 +48,9 @@ configureDokka {
 
 kotlin {
     defaultCompilerOptions()
+    compilerOptions {
+        freeCompilerArgs.add("-Xexpect-actual-classes")
+    }
     withSourcesJar()
     withJvm()
     withAndroidLibrary()
