@@ -115,7 +115,13 @@ test:linux:amd64:
     - *if-merge-request
     - *if-main
   script:
-    - ./gradlew clean linuxX64Test jvmTest --stacktrace
+    - ./gradlew clean linuxX64Test linuxArm64TestBinaries jvmTest --stacktrace
+  artifacts:
+    name: "filament-tests-$CI_COMMIT_REF_SLUG"
+    paths:
+      - filament-core/build/bin/linuxArm64/debugTest/test.kexe
+      - filament-coroutines/build/bin/linuxArm64/debugTest/test.kexe
+    expire_in: 1 days
   tags:
     - linux
     - shell
@@ -124,11 +130,16 @@ test:linux:amd64:
 test:linux:arm64:
   stage: test
   interruptible: true
+  dependencies:
+    - test:linux:amd64 # This provides our test binaries
   rules:
     - *if-merge-request
     - *if-main
   script:
-    - ./gradlew clean linuxArm64Test jvmTest --stacktrace
+    - chmod +x filament-core/build/bin/linuxArm64/debugTest/test.kexe
+    - ./filament-core/build/bin/linuxArm64/debugTest/test.kexe
+    - chmod +x filament-coroutines/build/bin/linuxArm64/debugTest/test.kexe
+    - ./filament-coroutines/build/bin/linuxArm64/debugTest/test.kexe
   tags:
     - linux
     - docker
