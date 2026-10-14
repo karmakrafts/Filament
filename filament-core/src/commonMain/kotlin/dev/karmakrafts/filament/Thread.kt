@@ -16,7 +16,6 @@
 
 package dev.karmakrafts.filament
 
-import dev.karmakrafts.filament.Thread.Companion.sleep
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -34,6 +33,8 @@ internal expect fun getThreadId(): ULong
 internal expect fun sleepThread(millis: Long): Long
 
 internal expect fun yieldThread()
+
+internal expect fun spinLoopHintThread()
 
 /**
  * Represents a thread of execution in a multiprocessing environment.
@@ -81,6 +82,18 @@ interface Thread {
          * This is a hint to the scheduler that the current thread is willing to yield its current use of the CPU.
          */
         fun yield() = yieldThread()
+
+        /**
+         * Hints that the current thread is busy-waiting in a spin loop.
+         * Call this on each iteration while waiting for a condition to change.
+         * The runtime or processor may use this hint to improve performance or reduce power consumption.
+         * The hint may have no effect on platforms that do not support it.
+         *
+         * Unlike [yield], this is not a request to the scheduler to let other threads execute.
+         * This does not provide synchronization or memory visibility guarantees;
+         * the loop must use appropriate atomic operations or other synchronization to observe changes.
+         */
+        fun spinLoopHint() = spinLoopHintThread()
 
         /**
          * Causes the current thread to sleep for the specified number of milliseconds.

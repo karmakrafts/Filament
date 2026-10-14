@@ -17,7 +17,14 @@
 package dev.karmakrafts.filament
 
 import platform.posix.sched_yield
+import dev.karmakrafts.filament.intrinsics.filament_spin_loop_hint
+import kotlinx.cinterop.ExperimentalForeignApi
 
 internal actual fun yieldThread() {
     sched_yield()
+}
+
+@OptIn(ExperimentalForeignApi::class)
+internal actual fun spinLoopHintThread() {
+    filament_spin_loop_hint()
 }

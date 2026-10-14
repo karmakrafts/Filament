@@ -49,20 +49,20 @@ private class JvmThread( // @formatter:off
 @PublishedApi
 internal actual fun setThreadName(name: String?) {
     JavaThread.currentThread().apply {
-        this.name = name ?: "Thread ${threadId()}"
+        this.name = name ?: "Thread $id"
     }
 }
 
 @PublishedApi
 internal actual fun getThreadName(): String {
     return JavaThread.currentThread().run {
-        name ?: "Thread ${threadId()}"
+        name ?: "Thread $id"
     }
 }
 
 @PublishedApi
 internal actual fun getThreadId(): ULong {
-    return JavaThread.currentThread().threadId().toULong()
+    return JavaThread.currentThread().id.toULong()
 }
 
 internal actual fun sleepThread(millis: Long): Long {

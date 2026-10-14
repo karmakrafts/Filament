@@ -1,7 +1,7 @@
 [versions]
 
-java = "21"
-filament = "2.3.0"
+java = "17"
+filament = "2.4.0"
 kotlin = "2.4.21" # https://github.com/JetBrains/kotlin/releases
 kotlinxCoroutines = "1.11.0" # https://github.com/Kotlin/kotlinx.coroutines/releases
 androidGradle = "9.4.1" # https://developer.android.com/reference/tools/gradle-api

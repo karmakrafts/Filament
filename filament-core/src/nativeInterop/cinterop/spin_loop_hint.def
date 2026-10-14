@@ -1,0 +1,36 @@
+package = dev.karmakrafts.filament.intrinsics
+
+---
+
+#if defined(__i386__) || defined(_M_IX86)
+#define FILAMENT_I386
+#elif defined(__x86_64__) || defined(_M_X64)
+#define FILAMENT_AMD64
+#elif defined(__aarch64__) || defined(_M_ARM64)
+#define FILAMENT_ARM64
+#elif defined(__arm__) || defined(_M_ARM)
+#define FILAMENT_ARM32
+#else
+#error "Unsupported target platform"
+#endif
+
+#if defined(FILAMENT_I386) || defined(FILAMENT_AMD64)
+#include <immintrin.h> // For the _mm_pause intrinsic
+#endif
+
+#ifdef __cplusplus
+#define FILAMENT_CALL extern "C"
+#else
+#define FILAMENT_CALL
+#endif
+
+#define FILAMENT_EXPORT __attribute__((visibility("default")))
+#define FILAMENT_API FILAMENT_EXPORT FILAMENT_CALL
+
+FILAMENT_API static inline void filament_spin_loop_hint() {
+#if defined(FILAMENT_I386) || defined(FILAMENT_AMD64)
+    _mm_pause();
+#elif defined(FILAMENT_ARM32) || defined(FILAMENT_ARM64)
+    __asm__ __volatile__("yield" ::: "memory"); // Is the same on ARMv7 and ARMv8
+#endif
+}

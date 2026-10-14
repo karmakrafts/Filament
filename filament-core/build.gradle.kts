@@ -46,20 +46,20 @@ configureDokka {
     withKotlinxCoroutines()
 }
 
-fun KotlinNativeTarget.pthreadInterop() {
-    compilations.getByName("main") {
-        cinterops {
-            register("pthread")
-        }
-    }
-}
-
 kotlin {
     defaultCompilerOptions()
     withSourcesJar()
     withJvm()
     withAndroidLibrary()
-    withNative()
+    withNative {
+        compilations {
+            named("main") {
+                cinterops {
+                    create("spin_loop_hint")
+                }
+            }
+        }
+    }
     applyDefaultHierarchyTemplate {
         common {
             group("ios") { withIos() }
