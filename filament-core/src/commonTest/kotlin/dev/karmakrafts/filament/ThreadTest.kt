@@ -16,10 +16,14 @@
 
 package dev.karmakrafts.filament
 
+import kotlin.concurrent.atomics.AtomicBoolean
+import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.TimeSource
 
 class ThreadTest {
     @Test
@@ -33,6 +37,50 @@ class ThreadTest {
         val id = Thread.id
         println("Current thread ID: $id")
         assertNotEquals(0UL, id)
+    }
+
+    @Test
+    fun `Spin loop hint preserves current thread ID`() {
+        val id = Thread.id
+        Thread.spinLoopHint()
+        assertEquals(id, Thread.id)
+    }
+
+    @Test
+    fun `Spin loop hint can be called repeatedly`() {
+        val id = Thread.id
+        repeat(10_000) {
+            Thread.spinLoopHint()
+        }
+        assertEquals(id, Thread.id)
+    }
+
+    @OptIn(ExperimentalAtomicApi::class)
+    @Test
+    fun `Spin loop hint can wait for an atomic signal`() {
+        val ready = AtomicBoolean(false)
+        val release = AtomicBoolean(false)
+        val observed = AtomicBoolean(false)
+        val thread = Thread {
+            val start = TimeSource.Monotonic.markNow()
+            do {
+                Thread.spinLoopHint()
+                ready.store(true)
+            } while (!release.load() && start.elapsedNow() < 5.seconds)
+            observed.store(release.load())
+        }
+        try {
+            val start = TimeSource.Monotonic.markNow()
+            while (!ready.load() && start.elapsedNow() < 5.seconds) {
+                Thread.spinLoopHint()
+            }
+            assertTrue(ready.load(), "Worker did not enter the spin loop")
+        }
+        finally {
+            release.store(true)
+            thread.join()
+        }
+        assertTrue(observed.load(), "Worker did not observe the atomic signal")
     }
 
     @Test

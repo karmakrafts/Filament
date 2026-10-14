@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+### Added
+
+- `Thread.spinLoopHint()` for more efficient spin loops compared to `Thread.yield()` if applicable
+
 ## [2.3.0]
 
 ### Changed
