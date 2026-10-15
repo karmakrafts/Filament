@@ -20,33 +20,64 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
+@OptIn(DelicateFilamentApi::class)
 class ProcessorTest {
+    private data class ProcessorInfo(
+        val logicalCores: Int = Processor.logicalCores,
+        val is64Bit: Boolean = Processor.is64Bit,
+        val vendor: String = Processor.vendor,
+        val model: String = Processor.model,
+        val ticksSupported: Boolean = Processor.ticksSupported
+    )
+
     @Test
     fun `Check logical core count`() {
         assertTrue(Processor.logicalCores > 0)
     }
 
     @Test
+    fun `Processor vendor is not blank`() {
+        assertTrue(Processor.vendor.isNotBlank())
+    }
+
+    @Test
+    fun `Processor model is not blank`() {
+        assertTrue(Processor.model.isNotBlank())
+    }
+
+    @Test
+    fun `Processor ticks advance when supported`() {
+        if (!Processor.ticksSupported) return
+        val start = Processor.ticks
+        Thread.sleep(1)
+        assertTrue(Processor.ticks > start, "The processor counter must advance during sleep")
+    }
+
+    @Test
+    fun `Processor ticks advance on a worker thread when supported`() {
+        if (!Processor.ticksSupported) return
+        val result = Thread<Pair<ULong, ULong>> {
+            val start = Processor.ticks
+            Thread.sleep(1)
+            start to Processor.ticks
+        }.awaitResult()
+        assertTrue(result.second > result.first, "The processor counter must advance on a worker thread")
+    }
+
+    @Test
     fun `Processor information is stable across repeated reads`() {
-        val logicalCores = Processor.logicalCores
-        val is64Bit = Processor.is64Bit
+        val expected = ProcessorInfo()
         repeat(100) {
-            assertEquals(logicalCores, Processor.logicalCores)
-            assertEquals(is64Bit, Processor.is64Bit)
+            assertEquals(expected, ProcessorInfo())
         }
     }
 
     @Test
     fun `Processor information is consistent across threads`() {
-        val logicalCores = Processor.logicalCores
-        val is64Bit = Processor.is64Bit
+        val expected = ProcessorInfo()
         repeat(4) {
-            val result = Thread<Pair<Int, Boolean>> {
-                Processor.logicalCores to Processor.is64Bit
-            }.awaitResult()
-            assertTrue(result.first > 0)
-            assertEquals(logicalCores, result.first)
-            assertEquals(is64Bit, result.second)
+            val result = Thread<ProcessorInfo> { ProcessorInfo() }.awaitResult()
+            assertEquals(expected, result)
         }
     }
 }

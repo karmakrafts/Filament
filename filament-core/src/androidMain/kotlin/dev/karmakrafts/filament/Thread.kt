@@ -20,7 +20,7 @@ import android.os.Build
 import java.lang.Thread as JavaThread
 
 internal actual fun spinLoopHintThread() {
-    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) {
         JavaThread.onSpinWait()
         return
     }

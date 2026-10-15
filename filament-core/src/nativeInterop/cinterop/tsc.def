@@ -1,0 +1,37 @@
+package = dev.karmakrafts.filament.intrinsics
+compilerOpts = -Isrc/c/include
+
+---
+
+#include <filament/filament.h>
+
+#if defined(FILAMENT_I386) || defined(FILAMENT_AMD64)
+#include <cpuid.h>
+#endif
+
+FILAMENT_API static inline bool filament_tsc_supported() {
+#if defined(FILAMENT_I386) || defined(FILAMENT_AMD64) || defined(FILAMENT_ARM64)
+    return true;
+#else
+    return false;
+#endif
+}
+
+FILAMENT_API static inline uint64_t filament_tsc_get() {
+#if defined(FILAMENT_I386) || defined(FILAMENT_AMD64)
+    volatile uint32_t lo = 0U;
+    volatile uint32_t hi = 0U;
+    __asm__ volatile( // @formatter:off
+        "rdtscp"
+        : "=a"(lo), "=d"(hi)
+        :: "memory"
+    ); // @formatter:on
+    return (uint64_t)hi << 32 | lo;
+#elif defined(FILAMENT_ARM64)
+    volatile uint64_t result = 0ULL;
+    __asm__ volatile("mrs %0, cntvct_el0" : "=r"(result));
+    return result;
+#else
+    return 0ULL;
+#endif
+}

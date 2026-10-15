@@ -22,9 +22,10 @@ pluginManagement {
     repositories {
         google()
         mavenCentral()
-        mavenLocal()
         gradlePluginPortal()
         maven("https://central.sonatype.com/repository/maven-snapshots")
+        maven("https://maven.aliyun.com/repository/google")
+        mavenLocal()
     }
 }
 
@@ -33,8 +34,9 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        mavenLocal()
         maven("https://central.sonatype.com/repository/maven-snapshots")
+        maven("https://maven.aliyun.com/repository/google")
+        mavenLocal()
     }
 }
 

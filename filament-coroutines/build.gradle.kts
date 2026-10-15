@@ -45,7 +45,7 @@ configureDokka {
 kotlin {
     defaultCompilerOptions()
     withSourcesJar()
-    withAndroidLibrary()
+    withAndroidLibrary("$group.coroutines")
     withNative()
     withJvm()
     applyDefaultHierarchyTemplate()
@@ -54,6 +54,20 @@ kotlin {
             dependencies {
                 api(projects.filamentCore)
                 api(libs.kotlinx.coroutines.core)
+            }
+        }
+        androidMain {
+            dependencies {
+                // Avoid empty JVM IDE class roots for core's runtime-only dependencies (KTIJ-40290)
+                compileOnly(libs.kotlinx.serialization.core)
+                compileOnly(libs.kotlinx.serialization.json)
+                compileOnly(libs.kotlinx.io.core)
+                compileOnly(libs.kotlinx.io.bytestring)
+                val oshiCore = libs.oshi.core.get()
+                compileOnly("${oshiCore.module}:${oshiCore.version}") {
+                    exclude(group = "net.java.dev.jna", module = "jna")
+                    exclude(group = "net.java.dev.jna", module = "jna-platform")
+                }
             }
         }
         commonTest {

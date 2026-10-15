@@ -19,11 +19,12 @@ import dev.karmakrafts.conventions.apache2License
 import dev.karmakrafts.conventions.defaultDependencyLocking
 import dev.karmakrafts.conventions.setRepository
 import dev.karmakrafts.conventions.signPublications
-import java.time.Duration
 
 plugins {
     alias(libs.plugins.dokka) apply false
     alias(libs.plugins.kotlin.multiplatform) apply false
+    alias(libs.plugins.kotlinx.serialization) apply false
+    alias(libs.plugins.kotlinx.atomicfu) apply false
     alias(libs.plugins.android.library) apply false
     alias(libs.plugins.karmaConventions)
     signing
@@ -34,8 +35,10 @@ group = "dev.karmakrafts.filament"
 version = GitLabCI.getDefaultVersion(libs.versions.filament)
 
 subprojects {
-    apply<PublishingPlugin>()
-    apply<SigningPlugin>()
+    apply {
+        plugin<PublishingPlugin>()
+        plugin<SigningPlugin>()
+    }
 
     group = rootProject.group
     version = rootProject.version

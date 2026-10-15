@@ -16,7 +16,25 @@
 
 package dev.karmakrafts.filament
 
+import oshi.SystemInfo
+
+private val systemInfo: SystemInfo by lazy(::SystemInfo)
+
 actual object Processor {
     actual val is64Bit: Boolean = System.getProperty("sun.arch.data.model")?.toIntOrNull() == 64
     actual val logicalCores: Int = Runtime.getRuntime().availableProcessors()
+
+    actual val vendor: String
+        get() = systemInfo.hardware.processor.processorIdentifier.vendor
+
+    actual val model: String
+        get() = systemInfo.hardware.processor.processorIdentifier.model
+
+    @DelicateFilamentApi
+    actual val ticksSupported: Boolean
+        get() = FilamentPlatform.areTicksSupported()
+
+    @DelicateFilamentApi
+    actual val ticks: ULong
+        get() = FilamentPlatform.getTicks().toULong()
 }

@@ -1,0 +1,37 @@
+{
+    "version": 1,
+    "platforms": {
+        "WINDOWS": {
+            "architectures": {
+                "x86_64,x64,amd64": {
+                    "resources": [
+                        "filament-natives/windows-amd64/libfilament-platform.dll"
+                    ]
+                }
+            }
+        },
+        "LINUX": {
+            "architectures": {
+                "x86_64,x64,amd64": {
+                    "resources": [
+                        "filament-natives/linux-amd64/libfilament-platform.so"
+                    ]
+                },
+                "aarch64,arm64": {
+                    "resources": [
+                        "filament-natives/linux-arm64/libfilament-platform.so"
+                    ]
+                }
+            }
+        },
+        "MACOS": {
+            "architectures": {
+                "aarch64,arm64": {
+                    "resources": [
+                        "filament-natives/macos-arm64/libfilament-platform.dylib"
+                    ]
+                }
+            }
+        }
+    }
+}

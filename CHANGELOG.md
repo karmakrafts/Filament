@@ -3,6 +3,10 @@
 ### Added
 
 - `Thread.spinLoopHint()` for more efficient spin loops compared to `Thread.yield()` if applicable
+- `Processor.vendor` exposes the human readable CPU vendor name
+- `Processor.model` exposes the human readable CPU model name
+- `Processor.ticksSupported` to determine whether the CPU has a timestamp counter
+- `Processor.ticks` to get the timestamp counter of the CPU
 
 ### Fixed
 

@@ -75,7 +75,8 @@ class ThreadTest {
             do {
                 Thread.spinLoopHint()
                 ready.store(true)
-            } while (!release.load() && start.elapsedNow() < 5.seconds)
+            }
+            while (!release.load() && start.elapsedNow() < 5.seconds)
             observed.store(release.load())
         }
         try {

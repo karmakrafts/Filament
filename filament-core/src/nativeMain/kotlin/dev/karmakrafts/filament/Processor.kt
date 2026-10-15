@@ -18,11 +18,34 @@
 
 package dev.karmakrafts.filament
 
+import dev.karmakrafts.filament.intrinsics.filament_tsc_get
+import dev.karmakrafts.filament.intrinsics.filament_tsc_supported
+import kotlinx.cinterop.ExperimentalForeignApi
 import kotlin.experimental.ExperimentalNativeApi
 
+internal expect fun getProcessorVendor(): String
+
+internal expect fun getProcessorModel(): String
+
+@OptIn(ExperimentalForeignApi::class)
 actual object Processor {
     actual val is64Bit: Boolean
         get() = Platform.cpuArchitecture.bitness == 64
+
     actual val logicalCores: Int
         get() = Platform.getAvailableProcessors()
+
+    actual val vendor: String
+        get() = getProcessorVendor()
+
+    actual val model: String
+        get() = getProcessorModel()
+
+    @DelicateFilamentApi
+    actual val ticksSupported: Boolean
+        get() = filament_tsc_supported()
+
+    @DelicateFilamentApi
+    actual val ticks: ULong
+        get() = filament_tsc_get()
 }

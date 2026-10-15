@@ -1,0 +1,24 @@
+{
+    "version": 1,
+    "platforms": {
+        "ANDROID": {
+            "architectures": {
+                "x86_64,x64,amd64": {
+                    "systemLibs": [
+                        "filament-platform"
+                    ]
+                },
+                "aarch64,arm64": {
+                    "systemLibs": [
+                        "filament-platform"
+                    ]
+                },
+                "arm,arm32,armgnueabi,armhf": {
+                    "systemLibs": [
+                        "filament-platform"
+                    ]
+                }
+            }
+        }
+    }
+}

@@ -18,7 +18,8 @@
 
 package dev.karmakrafts.filament
 
-import co.touchlab.stately.collections.ConcurrentMutableList
+import kotlinx.atomicfu.locks.ReentrantLock
+import kotlinx.atomicfu.locks.withLock
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.staticCFunction
 import platform.posix.atexit
@@ -30,25 +31,30 @@ internal data class GCBox<T : AutoCloseable>( // @formatter:off
     val value: T
 ) { // @formatter:on
     companion object {
-        private val boxes: ConcurrentMutableList<WeakReference<GCBox<*>>> = ConcurrentMutableList()
+        private val boxes: ArrayList<WeakReference<GCBox<*>>> = ArrayList()
+        private val boxesLock: ReentrantLock = ReentrantLock()
 
         init {
             atexit(staticCFunction<Unit> { // @formatter:off
                 GCBox.apply {
-                    while (boxes.isNotEmpty()) {
-                        boxes.removeFirst().value?.drop()
-                    } // @formatter:on
+                    boxesLock.withLock {
+                        while (boxes.isNotEmpty()) {
+                            boxes.removeFirst().value?.drop()
+                        } // @formatter:on
+                    }
                 }
             })
         }
 
         private fun dropDeadRefs() {
             val deadRefs = HashSet<WeakReference<GCBox<*>>>()
-            for (ref in boxes) {
-                if (ref.value != null) continue
-                deadRefs += ref
+            boxesLock.withLock {
+                for (ref in boxes) {
+                    if (ref.value != null) continue
+                    deadRefs += ref
+                }
+                boxes -= deadRefs
             }
-            boxes -= deadRefs
         }
     }
 
@@ -56,7 +62,9 @@ internal data class GCBox<T : AutoCloseable>( // @formatter:off
 
     init {
         dropDeadRefs()
-        boxes += WeakReference(this)
+        boxesLock.withLock {
+            boxes += WeakReference(this)
+        }
     }
 
     fun drop() {
