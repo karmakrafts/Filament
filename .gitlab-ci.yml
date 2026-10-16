@@ -159,6 +159,42 @@ test:macos:arm64:
     - macos
     - arm64
 
+test:ios:arm64:
+  stage: test
+  interruptible: true
+  rules:
+    - *if-merge-request
+    - *if-main
+  script:
+    - ./gradlew clean iosSimulatorArm64Test --stacktrace
+  tags:
+    - macos
+    - arm64
+
+test:tvos:arm64:
+  stage: test
+  interruptible: true
+  rules:
+    - *if-merge-request
+    - *if-main
+  script:
+    - ./gradlew clean tvosSimulatorArm64Test --stacktrace
+  tags:
+    - macos
+    - arm64
+
+test:watchos:arm64:
+  stage: test
+  interruptible: true
+  rules:
+    - *if-merge-request
+    - *if-main
+  script:
+    - ./gradlew clean watchosSimulatorArm64Test --stacktrace
+  tags:
+    - macos
+    - arm64
+
 test:windows:amd64:
   stage: test
   interruptible: true
