@@ -36,7 +36,6 @@ import kotlin.io.path.div
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.kotlinx.serialization)
-    alias(libs.plugins.kotlinx.atomicfu)
     alias(libs.plugins.android.library)
     alias(libs.plugins.dokka)
     `maven-publish`
