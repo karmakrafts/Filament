@@ -18,8 +18,8 @@
 
 package dev.karmakrafts.filament
 
-import dev.karmakrafts.filament.intrinsics.filament_tsc_get
-import dev.karmakrafts.filament.intrinsics.filament_tsc_supported
+import dev.karmakrafts.filament.platform.filament_are_ticks_supported
+import dev.karmakrafts.filament.platform.filament_get_ticks
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlin.experimental.ExperimentalNativeApi
 
@@ -43,9 +43,9 @@ actual object Processor {
 
     @DelicateFilamentApi
     actual val ticksSupported: Boolean
-        get() = filament_tsc_supported()
+        get() = filament_are_ticks_supported()
 
     @DelicateFilamentApi
     actual val ticks: ULong
-        get() = filament_tsc_get()
+        get() = filament_get_ticks()
 }

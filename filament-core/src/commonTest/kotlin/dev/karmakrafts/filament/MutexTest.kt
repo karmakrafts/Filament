@@ -35,7 +35,7 @@ class MutexTest {
     }.awaitResult()
 
     @Test
-    fun `Try lock succeeds on an unlocked mutex`() {
+    fun tryLockSucceedsOnAnUnlockedMutex() {
         val acquired = mutex.tryLock()
         try {
             assertTrue(acquired)
@@ -46,7 +46,7 @@ class MutexTest {
     }
 
     @Test
-    fun `Set value from another thread`() {
+    fun setValueFromAnotherThread() {
         val thread = Thread {
             mutex.withLock {
                 theValue = 4444
@@ -59,7 +59,7 @@ class MutexTest {
     }
 
     @Test
-    fun `Create multiple mutexes in a loop`() {
+    fun createMultipleMutexesInALoop() {
         for (index in 0..<1000) {
             val mutex = Mutex()
             val thread = Thread {
@@ -75,7 +75,7 @@ class MutexTest {
     }
 
     @Test
-    fun `Try lock fails while another thread owns the mutex`() {
+    fun tryLockFailsWhileAnotherThreadOwnsTheMutex() {
         mutex.withLock {
             assertFalse(tryLockFromAnotherThread())
             assertFalse(tryLockFromAnotherThread())
@@ -84,7 +84,7 @@ class MutexTest {
     }
 
     @Test
-    fun `Separate mutexes can be locked independently`() {
+    fun separateMutexesCanBeLockedIndependently() {
         val other = Mutex()
         mutex.withLock {
             val acquired = Thread<Boolean> {
@@ -96,7 +96,7 @@ class MutexTest {
     }
 
     @Test
-    fun `With lock returns the result and releases the mutex`() {
+    fun withLockReturnsTheResultAndReleasesTheMutex() {
         val result = mutex.withLock {
             assertFalse(tryLockFromAnotherThread())
             42
@@ -106,7 +106,7 @@ class MutexTest {
     }
 
     @Test
-    fun `With lock releases the mutex when the block throws`() {
+    fun withLockReleasesTheMutexWhenTheBlockThrows() {
         val exception = IllegalStateException("Expected failure")
         assertSame(exception, assertFailsWith<IllegalStateException> {
             mutex.withLock<Unit> { throw exception }
@@ -115,7 +115,7 @@ class MutexTest {
     }
 
     @Test
-    fun `Try with lock returns the result and releases the mutex`() {
+    fun tryWithLockReturnsTheResultAndReleasesTheMutex() {
         var calls = 0
         val result = mutex.tryWithLock(-1) {
             calls++
@@ -128,7 +128,7 @@ class MutexTest {
     }
 
     @Test
-    fun `Try with lock skips the block when another thread owns the mutex`() {
+    fun tryWithLockSkipsTheBlockWhenAnotherThreadOwnsTheMutex() {
         mutex.withLock {
             val result = Thread<Pair<Int, Boolean>> {
                 var called = false
@@ -145,7 +145,7 @@ class MutexTest {
     }
 
     @Test
-    fun `Try with lock releases the mutex when the block throws`() {
+    fun tryWithLockReleasesTheMutexWhenTheBlockThrows() {
         val exception = IllegalStateException("Expected failure")
         assertSame(exception, assertFailsWith<IllegalStateException> {
             mutex.tryWithLock(Unit) { throw exception }
@@ -154,7 +154,7 @@ class MutexTest {
     }
 
     @Test
-    fun `Lock helpers support null results`() {
+    fun lockHelpersSupportNullResults() {
         assertNull(mutex.withLock<String?> { null })
         assertTrue(tryLockFromAnotherThread())
         assertNull(mutex.tryWithLock<String?>("default") { null })
@@ -162,7 +162,7 @@ class MutexTest {
     }
 
     @Test
-    fun `Concurrent increments do not lose updates`() {
+    fun concurrentIncrementsDoNotLoseUpdates() {
         val threads = mutableListOf<Thread>()
         try {
             mutex.withLock {

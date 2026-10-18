@@ -49,21 +49,21 @@ class ExecutorDispatcherTest {
     }
 
     @Test
-    fun `Single-threaded dispatch`() {
+    fun singleThreadedDispatch() {
         ThreadPool().use { pool ->
             assertDispatch(pool, 1)
         }
     }
 
     @Test
-    fun `Multi-threaded dispatch`() {
+    fun multiThreadedDispatch() {
         ThreadPool(parallelism = THREAD_COUNT).use { pool ->
             assertDispatch(pool, THREAD_COUNT)
         }
     }
 
     @Test
-    fun `Dispatch with delayed workers`() {
+    fun dispatchWithDelayedWorkers() {
         val releaseWorkers = AtomicBoolean(false)
         val workerTimedOut = AtomicBoolean(false)
         ThreadPool(threadFactory = { block, index ->
@@ -85,7 +85,7 @@ class ExecutorDispatcherTest {
     }
 
     @Test
-    fun `All workers can dispatch concurrently`() {
+    fun allWorkersCanDispatchConcurrently() {
         val count = AtomicInt(0)
         val releaseWorkers = AtomicBoolean(false)
         val allWorkersStarted = CompletableDeferred<Unit>()
@@ -117,7 +117,7 @@ class ExecutorDispatcherTest {
     }
 
     @Test
-    fun `Resume and yield on the executor`() {
+    fun resumeAndYieldOnTheExecutor() {
         val callerId = Thread.id
         ThreadPool().use { pool ->
             val dispatcher = pool.asDispatcher()
@@ -145,7 +145,7 @@ class ExecutorDispatcherTest {
     }
 
     @Test
-    fun `Cancel suspended coroutine`() {
+    fun cancelSuspendedCoroutine() {
         val cleanedUp = AtomicBoolean(false)
         ThreadPool().use { pool ->
             val dispatcher = pool.asDispatcher()
@@ -173,7 +173,7 @@ class ExecutorDispatcherTest {
     }
 
     @Test
-    fun `Child failure reaches caller without stopping executor`() {
+    fun childFailureReachesCallerWithoutStoppingExecutor() {
         val failure = IllegalStateException("Dispatched failure")
         ThreadPool().use { pool ->
             val dispatcher = pool.asDispatcher()

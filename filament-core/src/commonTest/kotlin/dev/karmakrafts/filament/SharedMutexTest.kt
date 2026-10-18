@@ -41,7 +41,7 @@ class SharedMutexTest {
     }.awaitResult()
 
     @Test
-    fun `Try read lock succeeds on an unlocked mutex`() {
+    fun tryReadLockSucceedsOnAnUnlockedMutex() {
         val acquired = mutex.tryLock()
         try {
             assertTrue(acquired)
@@ -52,7 +52,7 @@ class SharedMutexTest {
     }
 
     @Test
-    fun `Try write lock succeeds on an unlocked mutex`() {
+    fun tryWriteLockSucceedsOnAnUnlockedMutex() {
         val acquired = mutex.tryLockWrite()
         try {
             assertTrue(acquired)
@@ -63,7 +63,7 @@ class SharedMutexTest {
     }
 
     @Test
-    fun `Set value from another thread`() {
+    fun setValueFromAnotherThread() {
         val thread = Thread {
             mutex.withWriteLock {
                 theValue = 4444
@@ -83,7 +83,7 @@ class SharedMutexTest {
     }
 
     @Test
-    fun `Create multiple shared mutexes in a loop`() {
+    fun createMultipleSharedMutexesInALoop() {
         for (index in 0..<1000) {
             val mutex = SharedMutex()
             val thread = Thread {
@@ -99,7 +99,7 @@ class SharedMutexTest {
     }
 
     @Test
-    fun `Read lock permits other readers but excludes writers`() {
+    fun readLockPermitsOtherReadersButExcludesWriters() {
         mutex.withLock {
             assertTrue(tryReadLockFromAnotherThread())
             assertFalse(tryWriteLockFromAnotherThread())
@@ -109,7 +109,7 @@ class SharedMutexTest {
     }
 
     @Test
-    fun `Write lock excludes readers and writers`() {
+    fun writeLockExcludesReadersAndWriters() {
         mutex.withWriteLock {
             assertFalse(tryReadLockFromAnotherThread())
             assertFalse(tryWriteLockFromAnotherThread())
@@ -119,7 +119,7 @@ class SharedMutexTest {
     }
 
     @Test
-    fun `Separate shared mutexes can be locked independently`() {
+    fun separateSharedMutexesCanBeLockedIndependently() {
         val other = SharedMutex()
         mutex.withWriteLock {
             val acquired = Thread<Boolean> {
@@ -132,13 +132,13 @@ class SharedMutexTest {
     }
 
     @Test
-    fun `With read lock returns the result and releases the mutex`() {
+    fun withReadLockReturnsTheResultAndReleasesTheMutex() {
         assertEquals(42, mutex.withLock { 42 })
         assertTrue(tryWriteLockFromAnotherThread())
     }
 
     @Test
-    fun `With read lock releases the mutex when the block throws`() {
+    fun withReadLockReleasesTheMutexWhenTheBlockThrows() {
         val exception = IllegalStateException("Expected failure")
         assertSame(exception, assertFailsWith<IllegalStateException> {
             mutex.withLock<Unit> { throw exception }
@@ -147,14 +147,14 @@ class SharedMutexTest {
     }
 
     @Test
-    fun `With write lock returns the result and releases the mutex`() {
+    fun withWriteLockReturnsTheResultAndReleasesTheMutex() {
         assertEquals(42, mutex.withWriteLock { 42 })
         assertTrue(tryReadLockFromAnotherThread())
         assertTrue(tryWriteLockFromAnotherThread())
     }
 
     @Test
-    fun `With write lock releases the mutex when the block throws`() {
+    fun withWriteLockReleasesTheMutexWhenTheBlockThrows() {
         val exception = IllegalStateException("Expected failure")
         assertSame(exception, assertFailsWith<IllegalStateException> {
             mutex.withWriteLock<Unit> { throw exception }
@@ -164,7 +164,7 @@ class SharedMutexTest {
     }
 
     @Test
-    fun `Try with read lock returns the result and releases the mutex`() {
+    fun tryWithReadLockReturnsTheResultAndReleasesTheMutex() {
         var calls = 0
         val result = mutex.tryWithLock(-1) {
             calls++
@@ -178,7 +178,7 @@ class SharedMutexTest {
     }
 
     @Test
-    fun `Try with read lock skips the block while a writer owns the mutex`() {
+    fun tryWithReadLockSkipsTheBlockWhileAWriterOwnsTheMutex() {
         mutex.withWriteLock {
             val result = Thread<Pair<Int, Boolean>> {
                 var called = false
@@ -195,7 +195,7 @@ class SharedMutexTest {
     }
 
     @Test
-    fun `Try with read lock releases the mutex when the block throws`() {
+    fun tryWithReadLockReleasesTheMutexWhenTheBlockThrows() {
         val exception = IllegalStateException("Expected failure")
         assertSame(exception, assertFailsWith<IllegalStateException> {
             mutex.tryWithLock(Unit) { throw exception }
@@ -204,7 +204,7 @@ class SharedMutexTest {
     }
 
     @Test
-    fun `Try with write lock returns the result and releases the mutex`() {
+    fun tryWithWriteLockReturnsTheResultAndReleasesTheMutex() {
         var calls = 0
         val result = mutex.tryWithWriteLock(-1) {
             calls++
@@ -219,7 +219,7 @@ class SharedMutexTest {
     }
 
     @Test
-    fun `Try with write lock skips the block while a reader owns the mutex`() {
+    fun tryWithWriteLockSkipsTheBlockWhileAReaderOwnsTheMutex() {
         mutex.withLock {
             val result = Thread<Pair<Int, Boolean>> {
                 var called = false
@@ -236,7 +236,7 @@ class SharedMutexTest {
     }
 
     @Test
-    fun `Try with write lock skips the block while a writer owns the mutex`() {
+    fun tryWithWriteLockSkipsTheBlockWhileAWriterOwnsTheMutex() {
         mutex.withWriteLock {
             val result = Thread<Pair<Int, Boolean>> {
                 var called = false
@@ -253,7 +253,7 @@ class SharedMutexTest {
     }
 
     @Test
-    fun `Try with write lock releases the mutex when the block throws`() {
+    fun tryWithWriteLockReleasesTheMutexWhenTheBlockThrows() {
         val exception = IllegalStateException("Expected failure")
         assertSame(exception, assertFailsWith<IllegalStateException> {
             mutex.tryWithWriteLock(Unit) { throw exception }
@@ -263,7 +263,7 @@ class SharedMutexTest {
     }
 
     @Test
-    fun `Write lock helpers support null results`() {
+    fun writeLockHelpersSupportNullResults() {
         assertNull(mutex.withWriteLock<String?> { null })
         assertTrue(tryWriteLockFromAnotherThread())
         assertNull(mutex.tryWithWriteLock<String?>("default") { null })
@@ -271,7 +271,7 @@ class SharedMutexTest {
     }
 
     @Test
-    fun `Write lockable delegates to the write lock`() {
+    fun writeLockableDelegatesToTheWriteLock() {
         mutex.writeLockable.withLock {
             assertFalse(tryReadLockFromAnotherThread())
             assertFalse(tryWriteLockFromAnotherThread())
@@ -292,7 +292,7 @@ class SharedMutexTest {
     }
 
     @Test
-    fun `Concurrent writers do not lose updates`() {
+    fun concurrentWritersDoNotLoseUpdates() {
         val threads = mutableListOf<Thread>()
         try {
             mutex.withWriteLock {

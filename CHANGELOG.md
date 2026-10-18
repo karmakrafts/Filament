@@ -15,6 +15,7 @@
 
 ### Changed
 
+- Updated to Karma Conventions 1.22.0
 - Improved test coverage accross public API
 
 ## [2.3.0]

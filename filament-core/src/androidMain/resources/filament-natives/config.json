@@ -5,17 +5,17 @@
             "architectures": {
                 "x86_64,x64,amd64": {
                     "systemLibs": [
-                        "filament-platform"
+                        "filament-platform-jni"
                     ]
                 },
                 "aarch64,arm64": {
                     "systemLibs": [
-                        "filament-platform"
+                        "filament-platform-jni"
                     ]
                 },
                 "arm,arm32,armgnueabi,armhf": {
                     "systemLibs": [
-                        "filament-platform"
+                        "filament-platform-jni"
                     ]
                 }
             }

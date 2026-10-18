@@ -108,6 +108,18 @@ security:
 
 # ------------------------------ Tests
 
+test:android:arm64:
+  stage: test
+  interruptible: true
+  rules:
+    - *if-merge-request
+    - *if-main
+  script:
+    - ./gradlew clean pixel6Api36AndroidDeviceTest --stacktrace
+  tags:
+    - macos
+    - arm64
+
 test:linux:amd64:
   stage: test
   interruptible: true

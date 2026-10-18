@@ -21,6 +21,8 @@ import dev.karmakrafts.conventions.dokka.withKotlin
 import dev.karmakrafts.conventions.dokka.withKotlinxCoroutines
 import dev.karmakrafts.conventions.kotlin.defaultCompilerOptions
 import dev.karmakrafts.conventions.kotlin.withAndroidLibrary
+import dev.karmakrafts.conventions.kotlin.withDefaultDeviceTests
+import dev.karmakrafts.conventions.kotlin.withDefaultHostTests
 import dev.karmakrafts.conventions.kotlin.withJvm
 import dev.karmakrafts.conventions.kotlin.withNative
 import dev.karmakrafts.conventions.setProjectInfo
@@ -45,7 +47,10 @@ configureDokka {
 kotlin {
     defaultCompilerOptions()
     withSourcesJar()
-    withAndroidLibrary("$group.coroutines")
+    withAndroidLibrary("$group.coroutines") {
+        withDefaultHostTests()
+        withDefaultDeviceTests()
+    }
     withNative()
     withJvm()
     applyDefaultHierarchyTemplate()
@@ -66,7 +71,11 @@ kotlin {
                 val oshiCore = libs.oshi.core.get()
                 compileOnly("${oshiCore.module}:${oshiCore.version}") {
                     exclude(group = "net.java.dev.jna", module = "jna")
+                    exclude(group = "net.java.dev.jna", module = "jna-jpms")
                     exclude(group = "net.java.dev.jna", module = "jna-platform")
+                    exclude(group = "net.java.dev.jna", module = "jna-platform-jpms")
+                    exclude(group = "net.java.dev.jna", module = "jna-runtime")
+                    exclude(group = "net.java.dev.jna", module = "jna-runtime-jpms")
                 }
             }
         }

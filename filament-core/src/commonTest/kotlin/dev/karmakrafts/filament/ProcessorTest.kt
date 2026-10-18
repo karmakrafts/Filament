@@ -31,22 +31,22 @@ class ProcessorTest {
     )
 
     @Test
-    fun `Check logical core count`() {
+    fun checkLogicalCoreCount() {
         assertTrue(Processor.logicalCores > 0)
     }
 
     @Test
-    fun `Processor vendor is not blank`() {
+    fun processorVendorIsNotBlank() {
         assertTrue(Processor.vendor.isNotBlank())
     }
 
     @Test
-    fun `Processor model is not blank`() {
+    fun processorModelIsNotBlank() {
         assertTrue(Processor.model.isNotBlank())
     }
 
     @Test
-    fun `Processor ticks advance when supported`() {
+    fun processorTicksAdvanceWhenSupported() {
         if (!Processor.ticksSupported) return
         val start = Processor.ticks
         Thread.sleep(1)
@@ -54,7 +54,7 @@ class ProcessorTest {
     }
 
     @Test
-    fun `Processor ticks advance on a worker thread when supported`() {
+    fun processorTicksAdvanceOnAWorkerThreadWhenSupported() {
         if (!Processor.ticksSupported) return
         val result = Thread<Pair<ULong, ULong>> {
             val start = Processor.ticks
@@ -65,7 +65,7 @@ class ProcessorTest {
     }
 
     @Test
-    fun `Processor information is stable across repeated reads`() {
+    fun processorInformationIsStableAcrossRepeatedReads() {
         val expected = ProcessorInfo()
         repeat(100) {
             assertEquals(expected, ProcessorInfo())
@@ -73,7 +73,7 @@ class ProcessorTest {
     }
 
     @Test
-    fun `Processor information is consistent across threads`() {
+    fun processorInformationIsConsistentAcrossThreads() {
         val expected = ProcessorInfo()
         repeat(4) {
             val result = Thread<ProcessorInfo> { ProcessorInfo() }.awaitResult()

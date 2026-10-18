@@ -32,7 +32,7 @@ import kotlin.time.TimeSource
 @OptIn(ExperimentalAtomicApi::class)
 class ThreadTest {
     @Test
-    fun `Create and join`() {
+    fun createAndJoin() {
         val calls = AtomicInt(0)
         val thread = Thread { calls.fetchAndIncrement() }
         thread.join()
@@ -43,21 +43,21 @@ class ThreadTest {
     }
 
     @Test
-    fun `Check current thread ID`() {
+    fun checkCurrentThreadId() {
         val id = Thread.id
         assertNotEquals(0UL, id)
         assertEquals(id, Thread.id)
     }
 
     @Test
-    fun `Spin loop hint preserves current thread ID`() {
+    fun spinLoopHintPreservesCurrentThreadId() {
         val id = Thread.id
         Thread.spinLoopHint()
         assertEquals(id, Thread.id)
     }
 
     @Test
-    fun `Spin loop hint can be called repeatedly`() {
+    fun spinLoopHintCanBeCalledRepeatedly() {
         val id = Thread.id
         repeat(10_000) {
             Thread.spinLoopHint()
@@ -66,7 +66,7 @@ class ThreadTest {
     }
 
     @Test
-    fun `Spin loop hint can wait for an atomic signal`() {
+    fun spinLoopHintCanWaitForAnAtomicSignal() {
         val ready = AtomicBoolean(false)
         val release = AtomicBoolean(false)
         val observed = AtomicBoolean(false)
@@ -94,7 +94,7 @@ class ThreadTest {
     }
 
     @Test
-    fun `Check separate thread ID`() {
+    fun checkSeparateThreadId() {
         val parentId = Thread.id
         val id = Thread<ULong> { Thread.id }.awaitResult()
         assertNotEquals(0UL, id)
@@ -103,7 +103,7 @@ class ThreadTest {
     }
 
     @Test
-    fun `Set and get thread affinity`() {
+    fun setAndGetThreadAffinity() {
         val thread = Thread<Int>(affinity = 0) { Thread.current().affinity }
         val affinity = thread.awaitResult()
         assertEquals(0, thread.affinity)
@@ -111,7 +111,7 @@ class ThreadTest {
     }
 
     @Test
-    fun `Creating a thread preserves the parent affinity`() {
+    fun creatingAThreadPreservesTheParentAffinity() {
         val affinities = Thread<Pair<Int, Int>> {
             val before = Thread.current().affinity
             Thread(affinity = 0) {}.join()
@@ -121,7 +121,7 @@ class ThreadTest {
     }
 
     @Test
-    fun `Thread with result`() {
+    fun threadWithResult() {
         val result = Thread<String> {
             "Hello, World!"
         }.awaitResult()
@@ -129,7 +129,7 @@ class ThreadTest {
     }
 
     @Test
-    fun `Thread is alive until released and joined`() {
+    fun threadIsAliveUntilReleasedAndJoined() {
         val ready = AtomicBoolean(false)
         val release = AtomicBoolean(false)
         val observed = AtomicBoolean(false)
@@ -159,7 +159,7 @@ class ThreadTest {
     }
 
     @Test
-    fun `Joining a thread repeatedly does not execute it again`() {
+    fun joiningAThreadRepeatedlyDoesNotExecuteItAgain() {
         val calls = AtomicInt(0)
         val thread = Thread { calls.fetchAndIncrement() }
         repeat(3) { thread.join() }
@@ -168,13 +168,13 @@ class ThreadTest {
     }
 
     @Test
-    fun `Current thread reports that it is alive`() {
+    fun currentThreadReportsThatItIsAlive() {
         assertTrue(Thread.current().isAlive)
         assertTrue(Thread<Boolean> { Thread.current().isAlive }.awaitResult())
     }
 
     @Test
-    fun `Thread names are local to the current thread`() {
+    fun threadNamesAreLocalToTheCurrentThread() {
         val originalName = Thread.name
         try {
             Thread.name = "parent-test"
@@ -192,14 +192,14 @@ class ThreadTest {
     }
 
     @Test
-    fun `Yield preserves current thread ID`() {
+    fun yieldPreservesCurrentThreadId() {
         val id = Thread.id
         repeat(100) { Thread.yield() }
         assertEquals(id, Thread.id)
     }
 
     @Test
-    fun `Sleep honors milliseconds`() {
+    fun sleepHonorsMilliseconds() {
         val start = TimeSource.Monotonic.markNow()
         val slept = Thread.sleep(20L)
         val elapsed = start.elapsedNow()
@@ -209,7 +209,7 @@ class ThreadTest {
     }
 
     @Test
-    fun `Sleep honors a duration`() {
+    fun sleepHonorsADuration() {
         val start = TimeSource.Monotonic.markNow()
         val slept = Thread.sleep(20.milliseconds)
         val elapsed = start.elapsedNow()
@@ -219,7 +219,7 @@ class ThreadTest {
     }
 
     @Test
-    fun `Sleep preserves milliseconds beyond a whole second`() {
+    fun sleepPreservesMillisecondsBeyondAWholeSecond() {
         val start = TimeSource.Monotonic.markNow()
         val slept = Thread.sleep(1020L)
         val elapsed = start.elapsedNow()
@@ -229,13 +229,13 @@ class ThreadTest {
     }
 
     @Test
-    fun `Sleep accepts zero`() {
+    fun sleepAcceptsZero() {
         assertTrue(Thread.sleep(0L) >= 0L)
         assertTrue(Thread.sleep(0.milliseconds) >= 0.milliseconds)
     }
 
     @Test
-    fun `Thread result remains available after joining`() {
+    fun threadResultRemainsAvailableAfterJoining() {
         val calls = AtomicInt(0)
         val thread = Thread<Int> {
             calls.fetchAndIncrement()

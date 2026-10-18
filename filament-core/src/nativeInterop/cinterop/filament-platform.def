@@ -1,0 +1,39 @@
+package = dev.karmakrafts.filament.platform
+
+compilerOpts.android_x64 = -Ibuild/filament-platform/androidAmd64/include
+libraryPaths.android_x64 = build/filament-platform/androidAmd64
+compilerOpts.android_x86 = -Ibuild/filament-platform/androidI386/include
+libraryPaths.android_x86 = build/filament-platform/androidI386
+compilerOpts.android_arm64 = -Ibuild/filament-platform/androidArm64/include
+libraryPaths.android_arm64 = build/filament-platform/androidArm64
+compilerOpts.android_arm32 = -Ibuild/filament-platform/androidArm32/include
+libraryPaths.android_arm32 = build/filament-platform/androidArm32
+
+compilerOpts.linux_x64 = -Ibuild/filament-platform/linuxAmd64/include
+libraryPaths.linux_x64 = build/filament-platform/linuxAmd64
+compilerOpts.linux_arm64 = -Ibuild/filament-platform/linuxArm64/include
+libraryPaths.linux_arm64 = build/filament-platform/linuxArm64
+
+compilerOpts.mingw_x64 = -Ibuild/filament-platform/windowsAmd64/include
+libraryPaths.mingw_x64 = build/filament-platform/windowsAmd64
+
+compilerOpts.macos_arm64 = -Ibuild/filament-platform/macosArm64/include
+libraryPaths.macos_arm64 = build/filament-platform/macosArm64
+
+compilerOpts.ios_arm64 = -Ibuild/filament-platform/iosArm64-device/include
+libraryPaths.ios_arm64 = build/filament-platform/iosArm64-device
+compilerOpts.ios_simulator_arm64 = -Ibuild/filament-platform/iosArm64-simulator/include
+libraryPaths.ios_simulator_arm64 = build/filament-platform/iosArm64-simulator
+
+compilerOpts.tvos_arm64 = -Ibuild/filament-platform/tvosArm64-device/include
+libraryPaths.tvos_arm64 = build/filament-platform/tvosArm64-device
+compilerOpts.tvos_simulator_arm64 = -Ibuild/filament-platform/tvosArm64-simulator/include
+libraryPaths.tvos_simulator_arm64 = build/filament-platform/tvosArm64-simulator
+
+compilerOpts.watchos_arm64 = -Ibuild/filament-platform/watchosArm64-device/include
+libraryPaths.watchos_arm64 = build/filament-platform/watchosArm64-device
+compilerOpts.watchos_simulator_arm64 = -Ibuild/filament-platform/watchosArm64-simulator/include
+libraryPaths.watchos_simulator_arm64 = build/filament-platform/watchosArm64-simulator
+
+staticLibraries = libfilament-platform-core.a
+headers = filament.h
