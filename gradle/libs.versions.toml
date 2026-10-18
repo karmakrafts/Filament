@@ -2,7 +2,7 @@
 
 java = "17"
 filament = "2.4.0"
-filamentPlatform = "1.8.0" # https://git.karmakrafts.dev/kk/prebuilts/filament-platform/-/packages
+filamentPlatform = "1.9.0" # https://git.karmakrafts.dev/kk/prebuilts/filament-platform/-/packages
 kotlin = "2.4.21" # https://github.com/JetBrains/kotlin/releases
 kotlinxCoroutines = "1.11.0" # https://github.com/Kotlin/kotlinx.coroutines/releases
 kotlinxSerialization = "1.11.0" # https://github.com/Kotlin/kotlinx.serialization/releases

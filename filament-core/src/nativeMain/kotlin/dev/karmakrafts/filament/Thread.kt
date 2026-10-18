@@ -16,7 +16,7 @@
 
 package dev.karmakrafts.filament
 
-import dev.karmakrafts.filament.intrinsics.filament_spin_loop_hint
+import dev.karmakrafts.filament.platform.filament_spin_loop_hint
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.posix.sched_yield
 
