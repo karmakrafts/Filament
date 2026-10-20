@@ -142,19 +142,5 @@ publishing {
     )
 }
 
-tasks {
-    val jvmPlatformCopyTasks = platformPackage.registerCopyJvmJniLibraryTasks("platform", "filament-platform-jni")
-    named("jvmProcessResources") {
-        dependsOn(jvmPlatformCopyTasks)
-    }
-    val androidPlatformCopyTasks =
-        platformPackage.registerCopyAndroidJniLibraryTasks("platform", "filament-platform-jni")
-    afterEvaluate { // TODO: move into conventions boilerplate
-        named("mergeAndroidMainJniLibFolders") {
-            dependsOn(androidPlatformCopyTasks)
-        }
-        named<Test>("testAndroidHostTest") {
-            classpath = files(named("jvmProcessResources")) + classpath
-        }
-    }
-}
+platformPackage.registerCopyJvmJniLibraryTasks("platform", "filament-platform-jni")
+platformPackage.registerCopyAndroidJniLibraryTasks("platform", "filament-platform-jni")

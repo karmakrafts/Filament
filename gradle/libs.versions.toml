@@ -10,7 +10,7 @@ kotlinxAtomicfu = "0.33.0" # https://github.com/Kotlin/kotlinx-atomicfu/releases
 kotlinxIo = "0.9.1" # https://github.com/Kotlin/kotlinx-io/releases
 androidGradle = "9.4.1" # https://developer.android.com/reference/tools/gradle-api
 dokka = "2.2.0" # https://github.com/Kotlin/dokka/releases
-karmaConventions = "1.22.0" # https://github.com/karmakrafts/karma-conventions/tags
+karmaConventions = "1.22.1" # https://github.com/karmakrafts/karma-conventions/tags
 jna = "5.19.1" # https://github.com/java-native-access/jna/tags
 oshi = "7.7.1" # https://github.com/oshi/oshi
 
