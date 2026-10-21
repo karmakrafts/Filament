@@ -16,27 +16,12 @@
 
 package dev.karmakrafts.filament
 
-import kotlinx.io.asSink
-import kotlinx.io.asSource
-import kotlinx.io.buffered
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import oshi.util.PlatformEnum
-import java.io.File
-import java.io.FileOutputStream
 import kotlin.concurrent.atomics.AtomicBoolean
-import kotlin.io.path.ExperimentalPathApi
-import kotlin.io.path.Path
-import kotlin.io.path.absolute
-import kotlin.io.path.absolutePathString
-import kotlin.io.path.createDirectories
-import kotlin.io.path.deleteIfExists
-import kotlin.io.path.deleteRecursively
-import kotlin.io.path.div
-import kotlin.uuid.Uuid
-import java.lang.Thread as JavaThread
 
 @Serializable
 internal data class NativeLoaderArchitectureConfig( // @formatter:off
@@ -59,15 +44,16 @@ internal data class NativeLoaderConfig( // @formatter:off
     }
 }
 
+internal expect fun loadExtraLibraries(config: NativeLoaderArchitectureConfig)
+
 internal object NativeLoader {
     private val json: Json = Json { ignoreUnknownKeys = true }
     private val isLoaded: AtomicBoolean = AtomicBoolean(false)
 
-    @Suppress("UnsafeDynamicallyLoadedCode")
-    @OptIn(ExperimentalSerializationApi::class, ExperimentalPathApi::class)
+    @OptIn(ExperimentalSerializationApi::class)
     fun ensureLoaded() {
         if (!isLoaded.compareAndSet(expectedValue = false, newValue = true)) return
-        val config = NativeLoader::class.java.getResourceAsStream("/filament-natives/config.json")?.use {
+        val config = NativeLoader::class.java.getResourceAsStream("/natives/filament.json")?.use {
             json.decodeFromStream<NativeLoaderConfig>(it)
         }!!
         check(config.version == NativeLoaderConfig.VERSION) {
@@ -83,33 +69,7 @@ internal object NativeLoader {
             } catch (error: Throwable) {
                 System.err.println("Could not load Filament system library $library: ${error.stackTraceToString()}")
             }
-            if (archConfig.resources.isNotEmpty()) {
-                val userHome = Path(System.getProperty("user.home") ?: ".").absolute()
-                val filamentHome = userHome / ".filament"
-                val tempDir = filamentHome / Uuid.random().toHexString()
-                tempDir.createDirectories()
-                for (resource in archConfig.resources) {
-                    val fileName = resource.substringAfterLast('/')
-                    val tempFile = tempDir / fileName
-                    try {
-                        tempFile.deleteIfExists()
-                        NativeLoader::class.java.getResourceAsStream("/$resource")!!
-                            .asSource()
-                            .buffered()
-                            .use { source ->
-                                FileOutputStream(File(tempFile.toString())).asSink().use { sink ->
-                                    source.transferTo(sink)
-                                }
-                            }
-                        System.load(tempFile.absolutePathString())
-                    } catch (error: Throwable) {
-                        System.err.println("Could not load Filament platform library $resource: ${error.stackTraceToString()}")
-                    }
-                }
-                Runtime.getRuntime().addShutdownHook(JavaThread {
-                    tempDir.deleteRecursively()
-                })
-            }
+            loadExtraLibraries(archConfig)
         }
     }
 }

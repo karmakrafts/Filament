@@ -17,7 +17,6 @@
 package dev.karmakrafts.filament
 
 import oshi.SystemInfo
-import oshi.util.PlatformEnum
 
 private val systemInfo: SystemInfo by lazy(::SystemInfo)
 
@@ -32,26 +31,7 @@ actual object Processor {
         get() = systemInfo.hardware.processor.processorIdentifier.model
 
     @DelicateFilamentApi
-    actual val ticksSupported: Boolean by lazy {
-        val platform = PlatformEnum.getCurrentPlatform()
-        val architecture = System.getProperty("os.arch") ?: ""
-        if (platform in setOf(PlatformEnum.LINUX, PlatformEnum.ANDROID) && architecture in setOf(
-                "x86",
-                "i386",
-                "i486",
-                "i586",
-                "i686",
-                "x86_64",
-                "amd64"
-            )
-        ) {
-            // The native library only checks the architecture, but RDTSCP is optional on x86.
-            if (systemInfo.hardware.processor.featureFlags.none { it.equals("rdtscp", ignoreCase = true) }) {
-                return@lazy false
-            }
-        }
-        FilamentPlatform.areTicksSupported()
-    }
+    actual val ticksSupported: Boolean by lazy { FilamentPlatform.areTicksSupported() }
 
     @DelicateFilamentApi
     actual val ticks: ULong
