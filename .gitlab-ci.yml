@@ -116,6 +116,12 @@ test:android:arm64:
     - *if-main
   script:
     - ./gradlew clean pixel6Api36AndroidDeviceTest --stacktrace
+  artifacts:
+    when: always
+    reports:
+      junit:
+        - filament-core/build/outputs/androidTest-results/managedDevice/**/TEST-*.xml
+        - filament-coroutines/build/outputs/androidTest-results/managedDevice/**/TEST-*.xml
   tags:
     - macos
     - arm64
@@ -130,10 +136,15 @@ test:linux:amd64:
     - ./gradlew clean linuxX64Test linuxArm64TestBinaries jvmTest --stacktrace
   artifacts:
     name: "filament-tests-$CI_COMMIT_REF_SLUG"
+    when: always
     paths:
       - filament-core/build/bin/linuxArm64/debugTest/test.kexe
       - filament-coroutines/build/bin/linuxArm64/debugTest/test.kexe
     expire_in: 1 days
+    reports:
+      junit:
+        - filament-core/build/test-results/**/TEST-*.xml
+        - filament-coroutines/build/test-results/**/TEST-*.xml
   tags:
     - linux
     - shell
@@ -151,9 +162,14 @@ test:linux:arm64:
     - *if-main
   script:
     - chmod +x filament-core/build/bin/linuxArm64/debugTest/test.kexe
-    - ./filament-core/build/bin/linuxArm64/debugTest/test.kexe
     - chmod +x filament-coroutines/build/bin/linuxArm64/debugTest/test.kexe
-    - ./filament-coroutines/build/bin/linuxArm64/debugTest/test.kexe
+    - ./gradlew karbide-core:linuxArm64StandaloneTest jvmTest --stacktrace
+  artifacts:
+    when: always
+    reports:
+      junit:
+        - filament-core/build/test-results/**/TEST-*.xml
+        - filament-coroutines/build/test-results/**/TEST-*.xml
   tags:
     - linux
     - docker
@@ -167,6 +183,12 @@ test:macos:arm64:
     - *if-main
   script:
     - ./gradlew clean macosArm64Test jvmTest --stacktrace
+  artifacts:
+    when: always
+    reports:
+      junit:
+        - filament-core/build/test-results/**/TEST-*.xml
+        - filament-coroutines/build/test-results/**/TEST-*.xml
   tags:
     - macos
     - arm64
@@ -179,6 +201,12 @@ test:ios:arm64:
     - *if-main
   script:
     - ./gradlew clean iosSimulatorArm64Test --stacktrace
+  artifacts:
+    when: always
+    reports:
+      junit:
+        - filament-core/build/test-results/**/TEST-*.xml
+        - filament-coroutines/build/test-results/**/TEST-*.xml
   tags:
     - macos
     - arm64
@@ -191,6 +219,12 @@ test:tvos:arm64:
     - *if-main
   script:
     - ./gradlew clean tvosSimulatorArm64Test --stacktrace
+  artifacts:
+    when: always
+    reports:
+      junit:
+        - filament-core/build/test-results/**/TEST-*.xml
+        - filament-coroutines/build/test-results/**/TEST-*.xml
   tags:
     - macos
     - arm64
@@ -203,6 +237,12 @@ test:watchos:arm64:
     - *if-main
   script:
     - ./gradlew clean watchosSimulatorArm64Test --stacktrace
+  artifacts:
+    when: always
+    reports:
+      junit:
+        - filament-core/build/test-results/**/TEST-*.xml
+        - filament-coroutines/build/test-results/**/TEST-*.xml
   tags:
     - macos
     - arm64
@@ -215,6 +255,12 @@ test:windows:amd64:
     - *if-main
   script:
     - ./gradlew clean mingwX64Test jvmTest --stacktrace
+  artifacts:
+    when: always
+    reports:
+      junit:
+        - filament-core/build/test-results/**/TEST-*.xml
+        - filament-coroutines/build/test-results/**/TEST-*.xml
   tags:
     - windows
     - amd64
