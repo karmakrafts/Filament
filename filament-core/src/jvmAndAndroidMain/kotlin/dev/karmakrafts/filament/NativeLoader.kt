@@ -16,12 +16,25 @@
 
 package dev.karmakrafts.filament
 
+import kotlinx.io.asSink
+import kotlinx.io.asSource
+import kotlinx.io.buffered
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import oshi.util.PlatformEnum
+import java.io.File
+import java.io.FileOutputStream
+import java.nio.file.Files
 import kotlin.concurrent.atomics.AtomicBoolean
+import kotlin.io.path.ExperimentalPathApi
+import kotlin.io.path.absolutePathString
+import kotlin.io.path.deleteIfExists
+import kotlin.io.path.deleteRecursively
+import kotlin.io.path.div
+import kotlin.use
+import java.lang.Thread as JavaThread
 
 @Serializable
 internal data class NativeLoaderArchitectureConfig( // @formatter:off
@@ -44,13 +57,12 @@ internal data class NativeLoaderConfig( // @formatter:off
     }
 }
 
-internal expect fun loadExtraLibraries(config: NativeLoaderArchitectureConfig)
-
 internal object NativeLoader {
     private val json: Json = Json { ignoreUnknownKeys = true }
     private val isLoaded: AtomicBoolean = AtomicBoolean(false)
 
-    @OptIn(ExperimentalSerializationApi::class)
+    @Suppress("UnsafeDynamicallyLoadedCode")
+    @OptIn(ExperimentalSerializationApi::class, ExperimentalPathApi::class)
     fun ensureLoaded() {
         if (!isLoaded.compareAndSet(expectedValue = false, newValue = true)) return
         val config = NativeLoader::class.java.getResourceAsStream("/natives/filament.json")?.use {
@@ -61,7 +73,7 @@ internal object NativeLoader {
         }
         val currentArch = System.getProperty("os.arch") ?: error("os.arch is not set, cannot determine architecture")
         val platformConfig = config.platforms[PlatformEnum.getCurrentPlatform()]!!
-        for ((compoundArch, archConfig) in platformConfig.architectures) {
+        for ([compoundArch, archConfig] in platformConfig.architectures) {
             val architectures = compoundArch.split(",") // We can match multiple architectures
             if (currentArch !in architectures) continue
             for (library in archConfig.systemLibs) try {
@@ -69,7 +81,30 @@ internal object NativeLoader {
             } catch (error: Throwable) {
                 System.err.println("Could not load Filament system library $library: ${error.stackTraceToString()}")
             }
-            loadExtraLibraries(archConfig)
+            if (archConfig.resources.isNotEmpty()) {
+                val tempDir = Files.createTempDirectory("filament")
+                for (resource in archConfig.resources) {
+                    val fileName = resource.substringAfterLast('/')
+                    val tempFile = tempDir / fileName
+                    try {
+                        tempFile.deleteIfExists()
+                        NativeLoader::class.java.getResourceAsStream("/$resource")!!
+                            .asSource()
+                            .buffered()
+                            .use { source ->
+                                FileOutputStream(File(tempFile.toString())).asSink().use { sink ->
+                                    source.transferTo(sink)
+                                }
+                            }
+                        System.load(tempFile.absolutePathString())
+                    } catch (error: Throwable) {
+                        System.err.println("Could not load Filament platform library $resource: ${error.stackTraceToString()}")
+                    }
+                }
+                Runtime.getRuntime().addShutdownHook(JavaThread {
+                    tempDir.deleteRecursively()
+                })
+            }
         }
     }
 }

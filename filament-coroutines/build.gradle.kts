@@ -24,6 +24,7 @@ import dev.karmakrafts.conventions.kotlin.withAndroidLibrary
 import dev.karmakrafts.conventions.kotlin.withDefaultDeviceTests
 import dev.karmakrafts.conventions.kotlin.withDefaultHostTests
 import dev.karmakrafts.conventions.kotlin.withJvm
+import dev.karmakrafts.conventions.kotlin.withLinuxArm64StandaloneTests
 import dev.karmakrafts.conventions.kotlin.withNative
 import dev.karmakrafts.conventions.setProjectInfo
 
@@ -47,11 +48,12 @@ configureDokka {
 kotlin {
     defaultCompilerOptions()
     withSourcesJar()
-    withAndroidLibrary("$group.coroutines") {
+    withAndroidLibrary(namespace = "$group.coroutines", minSdk = provider { "26" }) {
         withDefaultHostTests()
         withDefaultDeviceTests()
     }
     withNative()
+    withLinuxArm64StandaloneTests()
     withJvm()
     applyDefaultHierarchyTemplate()
     sourceSets {
@@ -82,6 +84,12 @@ kotlin {
         commonTest {
             dependencies {
                 implementation(libs.kotlin.test)
+            }
+        }
+        named("androidHostTest") {
+            dependencies {
+                implementation(libs.jna)
+                implementation(libs.jna.platform)
             }
         }
     }

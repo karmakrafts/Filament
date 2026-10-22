@@ -34,7 +34,9 @@ class ThreadTest {
     @Test
     fun createAndJoin() {
         val calls = AtomicInt(0)
-        val thread = Thread { calls.fetchAndIncrement() }
+        val thread = Thread {
+            calls.fetchAndIncrement()
+        }
         thread.join()
         assertEquals(1, calls.load())
         assertFalse(thread.isAlive)
@@ -161,7 +163,9 @@ class ThreadTest {
     @Test
     fun joiningAThreadRepeatedlyDoesNotExecuteItAgain() {
         val calls = AtomicInt(0)
-        val thread = Thread { calls.fetchAndIncrement() }
+        val thread = Thread {
+            calls.fetchAndIncrement()
+        }
         repeat(3) { thread.join() }
         assertEquals(1, calls.load())
         assertFalse(thread.isAlive)

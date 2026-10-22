@@ -30,6 +30,7 @@ import dev.karmakrafts.conventions.kotlin.withCInterop
 import dev.karmakrafts.conventions.kotlin.withDefaultDeviceTests
 import dev.karmakrafts.conventions.kotlin.withDefaultHostTests
 import dev.karmakrafts.conventions.kotlin.withJvm
+import dev.karmakrafts.conventions.kotlin.withLinuxArm64StandaloneTests
 import dev.karmakrafts.conventions.kotlin.withNative
 import dev.karmakrafts.conventions.setProjectInfo
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
@@ -43,10 +44,6 @@ plugins {
     signing
 }
 
-val platformPackage: GitLabPackage = gitlab().project(
-    "kk/prebuilts/filament-platform"
-).packageRegistry["generic/build", libs.versions.filamentPlatform]
-
 configureJava(rootProject.libs.versions.java)
 
 configureDokka {
@@ -55,6 +52,13 @@ configureDokka {
     withKotlinxCoroutines()
 }
 
+val platformPackage: GitLabPackage = gitlab().project(
+    "kk/prebuilts/filament-platform"
+).packageRegistry["generic/build", libs.versions.filamentPlatform]
+
+platformPackage.registerCopyJvmJniLibraryTasks("platform", "filament-platform-jni")
+platformPackage.registerCopyAndroidJniLibraryTasks("platform", "filament-platform-jni")
+
 kotlin {
     defaultCompilerOptions()
     compilerOptions {
@@ -62,13 +66,14 @@ kotlin {
     }
     withSourcesJar()
     withJvm()
-    withAndroidLibrary("$group.core") {
+    withAndroidLibrary(namespace = "$group.core", minSdk = provider { "26" }) {
         withDefaultHostTests()
         withDefaultDeviceTests()
     }
     withNative {
         withCInterop("filament-platform", platformPackage)
     }
+    withLinuxArm64StandaloneTests()
     applyDefaultHierarchyTemplate {
         common {
             group("ios") { withIos() }
@@ -128,6 +133,7 @@ kotlin {
         }
         named("androidHostTest") {
             dependencies {
+                implementation(libs.jna)
                 implementation(libs.jna.platform)
             }
         }
@@ -141,6 +147,3 @@ publishing {
         url = "https://git.karmakrafts.dev/kk/filament"
     )
 }
-
-platformPackage.registerCopyJvmJniLibraryTasks("platform", "filament-platform-jni")
-platformPackage.registerCopyAndroidJniLibraryTasks("platform", "filament-platform-jni")
