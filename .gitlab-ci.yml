@@ -163,7 +163,7 @@ test:linux:arm64:
   script:
     - chmod +x filament-core/build/bin/linuxArm64/debugTest/test.kexe
     - chmod +x filament-coroutines/build/bin/linuxArm64/debugTest/test.kexe
-    - ./gradlew karbide-core:linuxArm64StandaloneTest jvmTest --stacktrace
+    - ./gradlew linuxArm64StandaloneTest jvmTest --stacktrace
   artifacts:
     when: always
     reports:
