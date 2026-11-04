@@ -16,10 +16,13 @@
 ### Changed
 
 - Updated to Gradle 9.8.2
+- Updated to AGP 9.5.0
 - Updated to Kotlin 2.5.0-Beta2
+- Updated to kotlinx.io 0.9.2
 - Updated to Dokka 2.3.0-Beta
-- Updated to Karma Conventions 1.23.0.313-SNAPSHOT
+- Updated to Karma Conventions 1.23.0.317-SNAPSHOT
 - Updated to kotlinx.serialization 1.12.0
+- Updated to OSHI 7.7.3
 - Improved test coverage accross public API
 
 ## [2.3.0]
